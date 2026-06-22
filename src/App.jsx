@@ -36,10 +36,25 @@ const AuthenticatedApp = () => {
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-muted-foreground font-display">FUTAMART</span>
+      <div className="fixed inset-0 flex items-center justify-center bg-background overflow-hidden">
+        <style>{`
+          @keyframes futmartPopIn {
+            0% { opacity: 0; transform: scale(0.6); }
+            60% { opacity: 1; transform: scale(1.08); }
+            100% { opacity: 1; transform: scale(1); }
+          }
+          .futmart-logo-pop {
+            animation: futmartPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+        `}</style>
+        <div className="flex flex-col items-center gap-4">
+          <img
+            src="https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/5bd4ffbb9_QjhED.jpg"
+            alt="FUTAMART"
+            className="w-24 h-24 rounded-2xl shadow-2xl futmart-logo-pop"
+          />
+          <span className="text-sm text-muted-foreground font-display tracking-wide">FUTAMART</span>
+          <div className="w-6 h-6 border-2 border-orange-400 border-t-transparent rounded-full animate-spin mt-1" />
         </div>
       </div>
     );

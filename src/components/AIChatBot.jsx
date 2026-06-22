@@ -1,93 +1,148 @@
-import { useState, useRef, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
-import { MessageCircle, X, Send, Bot, Mail, AlertCircle, HelpCircle, HeadphonesIcon, ChevronRight } from "lucide-react";
+﻿import { useState, useMemo, useEffect } from "react";
+import {
+  Bot, X, Search, ChevronDown, ChevronRight, ArrowLeft, Mail,
+  HeadphonesIcon, AlertCircle, ShoppingBag, Tag, User, Shield,
+  Crown, Smartphone, MessageCircle,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-const SYSTEM_CONTEXT = `You are FUTAMART AI, a friendly, warm, and professional marketplace assistant for FUTAMART — a peer-to-peer marketplace app used by students and young Nigerians to buy and sell items.
-
-Your personality:
-- Warm, encouraging, and conversational — never robotic or cold
-- Patient and supportive, especially with confused or frustrated users
-- Professional but approachable, like a helpful friend
-- Ask follow-up questions when needed
-- Guide users step-by-step when helping with tasks
-
-You help users with:
-- Buying and selling on FUTAMART
-- Posting and managing listings
-- Using the chat and messaging features  
-- Account settings, verification, and PRO seller status
-- Safety tips and scam prevention
-- Navigating the app (Home, Search, Saved, Profile, Notifications)
-- Understanding pricing, negotiation, and best practices
-- Resolving issues and directing to support when needed
-
-Safety guidelines:
-- Always remind users to meet in safe public places
-- Warn about common scams (fake payments, overpayment, etc.)
-- Encourage verified sellers and PRO badges for trust
-
-Support contact: futmartcares@gmail.com
-
-Keep responses friendly, concise (2-4 sentences max per turn), and action-oriented. Use emojis sparingly for warmth. Never sound robotic.`;
-
-const QUICK_ACTIONS = [
-  "How do I post a listing?",
-  "How do I contact a seller?",
-  "Is this app safe?",
-  "What is PRO seller?",
+const FAQ_CATEGORIES = [
+  {
+    id: "buying",
+    label: "Buying",
+    icon: ShoppingBag,
+    questions: [
+      { q: "How do I buy an item?", a: "Browse or search for what you need, open the listing, and tap 'Message Seller' to start chatting. Once you agree on price and meeting details, complete the deal directly with the seller." },
+      { q: "How do I contact a seller?", a: "Open any listing and tap the 'Message Seller' or 'Contact' button — this opens a chat with them right inside the app." },
+      { q: "Can I negotiate the price?", a: "Yes! Prices are set by sellers but most are open to reasonable offers. Just ask politely in the chat." },
+      { q: "What if the seller doesn't respond?", a: "Give it some time — sellers may be busy. If they're inactive for a while, try another listing or check the seller's profile for their online status." },
+      { q: "How do I save items for later?", a: "Tap the bookmark/heart icon on any listing to save it. You can find all saved items under 'Saved Ads' in your profile." },
+      { q: "Is it safe to buy on FUTAMART?", a: "Always meet in safe, public, well-lit places — ideally on campus. Never pay in full before inspecting the item, and look out for sellers with a Verified badge for extra trust." },
+    ],
+  },
+  {
+    id: "selling",
+    label: "Selling",
+    icon: Tag,
+    questions: [
+      { q: "How do I post a listing?", a: "Tap the '+' or 'Create Listing' button, add clear photos, a good title, description, and price, then submit. Your listing goes live immediately." },
+      { q: "How do I edit or delete a listing?", a: "Go to your Profile, find the listing under your active ads, and tap it to edit details or remove it entirely." },
+      { q: "How long does my listing stay active?", a: "Listings stay active until you remove them or mark them as sold. There's no automatic expiry." },
+      { q: "How do I price my item?", a: "Check similar listings on the app for a sense of fair pricing. Pricing competitively usually gets faster responses from buyers." },
+      { q: "Can I add multiple photos?", a: "Yes — add as many clear photos as you can when creating your listing. Good photos sell faster." },
+      { q: "How do buyers contact me?", a: "Interested buyers will message you directly through the in-app chat — you'll see it under 'Chats' and get a notification." },
+    ],
+  },
+  {
+    id: "account",
+    label: "Account & Profile",
+    icon: User,
+    questions: [
+      { q: "How do I change my username?", a: "Go to Settings → Change Username. Note: you can only change it once, so choose carefully — this can't be undone afterward." },
+      { q: "How do I update my bio or phone number?", a: "Go to Settings, then tap 'Bio / Location' or 'Change phone number' to update either one anytime." },
+      { q: "How do I change my password?", a: "On the login screen, tap 'Forgot Password' and follow the reset steps sent to your email." },
+      { q: "How do I switch between dark and light mode?", a: "Go to Settings → Appearance / Theme, and choose Dark, Light, or System (matches your phone's setting)." },
+      { q: "What is the 'Verified ID' badge?", a: "It's awarded automatically once a seller reaches 50+ reviews with a 3.0+ average rating — it signals they're trustworthy and active." },
+    ],
+  },
+  {
+    id: "messaging",
+    label: "Chat & Messaging",
+    icon: MessageCircle,
+    questions: [
+      { q: "How does messaging work?", a: "Tap 'Message Seller' on any listing, or open an existing conversation under 'Chats'. Messages send and update instantly." },
+      { q: "Can I send images or voice notes?", a: "Yes — in any chat, tap the paperclip/image icon to send a photo, or the mic icon to record and send a voice note." },
+      { q: "How do I reply to a specific message?", a: "Swipe a message left or right to quote and reply directly to it — your reply will show the original message above it." },
+      { q: "How do I know if my message was read?", a: "Look for the checkmarks under your message — a single check means sent, double check means delivered, and blue double checks mean it's been read." },
+    ],
+  },
+  {
+    id: "safety",
+    label: "Safety & Trust",
+    icon: Shield,
+    questions: [
+      { q: "How do I stay safe meeting a buyer or seller?", a: "Always meet in public, well-lit places — ideally on campus during daytime. Bring a friend if possible, and trust your instincts." },
+      { q: "What scams should I watch out for?", a: "Be cautious of buyers asking to 'overpay' and requesting a refund of the difference, fake payment screenshots, or anyone pressuring you to skip meeting in person." },
+      { q: "How do I report a user or listing?", a: "Open the listing or chat, tap the report icon, and describe the issue. Our team reviews every report." },
+    ],
+  },
+  {
+    id: "pro",
+    label: "PRO Seller",
+    icon: Crown,
+    questions: [
+      { q: "What is PRO Seller?", a: "PRO Seller is an upcoming upgraded plan for sellers, with extra visibility and features for their listings." },
+      { q: "When will it be available?", a: "PRO Seller is launching soon — you can check 'Pro Seller Plan' under Settings for updates." },
+    ],
+  },
+  {
+    id: "technical",
+    label: "App & Technical",
+    icon: Smartphone,
+    questions: [
+      { q: "Can I install FUTAMART as an app on my phone?", a: "Yes! On Android Chrome, you'll see an 'Install FUTAMART' banner — just tap Install. On iPhone, tap the Share icon in Safari, then 'Add to Home Screen'." },
+      { q: "The app seems slow or shows a blank screen — what do I do?", a: "Try fully closing and reopening the app, or refresh your browser tab. If it persists, check your internet connection." },
+      { q: "How do I turn on notifications?", a: "Go to Settings → Push notifications and toggle it on. You can also manage message and sound notifications separately there." },
+      { q: "How do I log out?", a: "Go to your Profile, scroll down, and tap 'Log Out'." },
+    ],
+  },
 ];
+
+const ALL_QUESTIONS = FAQ_CATEGORIES.flatMap((cat) =>
+  cat.questions.map((q) => ({ ...q, category: cat.label, categoryId: cat.id }))
+);
+
+const ANSWER_DELAY_MS = 500;
 
 export default function AIChatBot() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const endRef = useRef(null);
-  const conversationRef = useRef([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const [loadingIndex, setLoadingIndex] = useState(null);
+  const [search, setSearch] = useState("");
+
+  const searchResults = useMemo(() => {
+    if (!search.trim()) return null;
+    const term = search.trim().toLowerCase();
+    return ALL_QUESTIONS.filter(
+      (item) =>
+        item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term)
+    );
+  }, [search]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, open]);
-
-  const send = async (text) => {
-    const userMsg = (text || input).trim();
-    if (!userMsg || loading) return;
-    setInput("");
-    const userEntry = { role: "user", text: userMsg };
-    setMessages(prev => [...prev, userEntry]);
-    conversationRef.current = [...conversationRef.current, userEntry];
-    setLoading(true);
-
-    const history = conversationRef.current
-      .slice(-8)
-      .map(m => `${m.role === "user" ? "User" : "FUTAMART AI"}: ${m.text}`)
-      .join("\n");
-
-    const reply = await base44.integrations.Core.InvokeLLM({
-      prompt: `${SYSTEM_CONTEXT}\n\nConversation history:\n${history}\n\nUser: ${userMsg}\n\nFUTAMART AI:`,
-    });
-
-    const assistantEntry = { role: "assistant", text: reply };
-    setMessages(prev => [...prev, assistantEntry]);
-    conversationRef.current = [...conversationRef.current, assistantEntry];
-    setLoading(false);
-  };
+    setExpandedIndex(null);
+    setLoadingIndex(null);
+  }, [selectedCategory, search]);
 
   const handleOpen = () => {
     setOpen(true);
-    if (messages.length === 0) {
-      setMessages([{
-        role: "assistant",
-        text: "👋 Hi! I'm FUTAMART AI, your marketplace assistant. I can help you buy, sell, manage listings, answer questions, and guide you around FutaMart. How can I help you today?",
-        isWelcome: true,
-      }]);
-    }
+    setSelectedCategory(null);
+    setExpandedIndex(null);
+    setLoadingIndex(null);
+    setSearch("");
   };
+
+  const handleClose = () => setOpen(false);
+  const goBack = () => setSelectedCategory(null);
+
+  const handleToggle = (i) => {
+    if (expandedIndex === i) {
+      setExpandedIndex(null);
+      setLoadingIndex(null);
+      return;
+    }
+    setExpandedIndex(i);
+    setLoadingIndex(i);
+    setTimeout(() => {
+      setLoadingIndex((current) => (current === i ? null : current));
+    }, ANSWER_DELAY_MS);
+  };
+
+  const currentCategory = FAQ_CATEGORIES.find((c) => c.id === selectedCategory);
 
   return (
     <>
-      {/* Floating button */}
       {!open && (
         <button
           onClick={handleOpen}
@@ -101,144 +156,153 @@ export default function AIChatBot() {
         </button>
       )}
 
-      {/* Chat window */}
       {open && (
         <div className="fixed bottom-20 right-3 z-50 w-[340px] max-w-[calc(100vw-24px)] h-[520px] bg-card border border-white/10 rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 shrink-0"
-            style={{ background: "linear-gradient(135deg, #FF6B00, #FF8C00, #FFB000)" }}>
+          <div
+            className="flex items-center justify-between px-4 py-3 shrink-0"
+            style={{ background: "linear-gradient(135deg, #FF6B00, #FF8C00, #FFB000)" }}
+          >
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
-              </div>
+              {selectedCategory && !search ? (
+                <button onClick={goBack} className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                  <ArrowLeft className="w-4 h-4 text-white" />
+                </button>
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
+              )}
               <div>
-                <p className="font-heading font-bold text-white text-sm leading-none">FUTAMART AI</p>
-                <p className="text-[10px] text-white/70 mt-0.5">Your marketplace assistant</p>
+                <p className="font-heading font-bold text-white text-sm leading-none">
+                  {currentCategory && !search ? currentCategory.label : "FUTAMART Help"}
+                </p>
+                <p className="text-[10px] text-white/70 mt-0.5">
+                  {currentCategory && !search ? "Tap a question for the answer" : "Find quick answers"}
+                </p>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+            <button onClick={handleClose} className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
               <X className="w-4 h-4 text-white" />
             </button>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
-            {messages.map((m, i) => (
-              <div key={i}>
-                <div className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} gap-2`}>
-                  {m.role === "assistant" && (
-                    <div className="w-6 h-6 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center shrink-0 mt-1">
-                      <Bot className="w-3 h-3 text-orange-400" />
-                    </div>
-                  )}
-                  <div className={`max-w-[82%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                    m.role === "user"
-                      ? "text-white rounded-br-sm"
-                      : "bg-white/8 text-foreground rounded-bl-sm border border-white/8"
-                  }`}
-                    style={m.role === "user" ? {
-                      background: "linear-gradient(135deg, #FF6B00, #FF8C00)",
-                    } : {}}>
-                    {m.text}
-                  </div>
-                </div>
-
-                {/* Quick actions after welcome */}
-                {m.isWelcome && i === 0 && messages.length === 1 && (
-                  <div className="mt-3 ml-8 space-y-1.5">
-                    {QUICK_ACTIONS.map((action, qi) => (
-                      <button
-                        key={qi}
-                        onClick={() => send(action)}
-                        className="w-full text-left px-3 py-2 rounded-xl glass text-xs text-foreground hover:border-orange-400/40 transition-all flex items-center justify-between gap-2"
-                      >
-                        <span>{action}</span>
-                        <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {loading && (
-              <div className="flex justify-start gap-2">
-                <div className="w-6 h-6 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center shrink-0 mt-1">
-                  <Bot className="w-3 h-3 text-orange-400" />
-                </div>
-                <div className="bg-white/8 border border-white/8 px-3 py-2.5 rounded-2xl rounded-bl-sm">
-                  <div className="flex gap-1">
-                    {[0, 1, 2].map(d => (
-                      <div key={d} className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce"
-                        style={{ animationDelay: `${d * 0.15}s` }} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Help Center */}
-            {messages.length > 0 && (
-              <div className="mt-3 glass rounded-2xl p-3 border border-orange-400/15">
-                <p className="text-[10px] font-semibold text-orange-400 mb-2 flex items-center gap-1">
-                  <HeadphonesIcon className="w-3 h-3" /> Help Center
-                </p>
-                <div className="space-y-1.5">
-                  <a
-                    href="mailto:futmartcares@gmail.com"
-                    className="flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                  >
-                    <Mail className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                    <span className="text-[11px] text-foreground">futmartcares@gmail.com</span>
-                  </a>
-                  <button
-                    onClick={() => send("I need to contact support")}
-                    className="w-full flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-left"
-                  >
-                    <HeadphonesIcon className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                    <span className="text-[11px] text-foreground">Contact Support</span>
-                  </button>
-                  <button
-                    onClick={() => send("I want to report a problem")}
-                    className="w-full flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-left"
-                  >
-                    <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                    <span className="text-[11px] text-foreground">Report a Problem</span>
-                  </button>
-                  <button
-                    onClick={() => send("Show me frequently asked questions")}
-                    className="w-full flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-left"
-                  >
-                    <HelpCircle className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                    <span className="text-[11px] text-foreground">FAQ</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div ref={endRef} />
+          <div className="p-2.5 border-b border-white/8 shrink-0">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search for an answer..."
+                className="h-9 text-xs bg-white/5 border-white/10 rounded-xl pl-8"
+              />
+            </div>
           </div>
 
-          {/* Input */}
-          <div className="p-2.5 border-t border-white/8 flex gap-2 shrink-0">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && send()}
-              placeholder="Ask me anything..."
-              className="h-9 text-xs bg-white/5 border-white/10 rounded-xl flex-1"
-            />
-            <button
-              onClick={() => send()}
-              disabled={loading || !input.trim()}
-              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 disabled:opacity-40"
-              style={{ background: "linear-gradient(135deg, #FF6B00, #FF8C00)" }}
-            >
-              <Send className="w-3.5 h-3.5 text-white" />
-            </button>
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {search.trim() ? (
+              searchResults.length > 0 ? (
+                searchResults.map((item, i) => (
+                  <FaqItem key={i} item={item} expanded={expandedIndex === i} loading={loadingIndex === i} onToggle={() => handleToggle(i)} showCategory />
+                ))
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-sm text-muted-foreground">No matching answers found.</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">Try the Help Center below.</p>
+                </div>
+              )
+            ) : !selectedCategory ? (
+              <div className="grid grid-cols-2 gap-2">
+                {FAQ_CATEGORIES.map((cat) => {
+                  const Icon = cat.icon;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-2xl glass hover:border-orange-400/40 transition-all"
+                      style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.1), rgba(251,191,36,0.04))" }}
+                    >
+                      <Icon className="w-5 h-5 text-orange-400" />
+                      <span className="text-[11px] font-medium text-foreground text-center leading-tight">{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              currentCategory.questions.map((item, i) => (
+                <FaqItem key={i} item={item} expanded={expandedIndex === i} loading={loadingIndex === i} onToggle={() => handleToggle(i)} />
+              ))
+            )}
+
+            <div className="mt-3 glass rounded-2xl p-3 border border-orange-400/15">
+              <p className="text-[10px] font-semibold text-orange-400 mb-2 flex items-center gap-1">
+                <HeadphonesIcon className="w-3 h-3" /> Still need help?
+              </p>
+              <div className="space-y-1.5">
+                
+                  href="mailto:futmartcares@gmail.com"
+                  className="flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  <Mail className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span className="text-[11px] text-foreground">futmartcares@gmail.com</span>
+                </a>
+                
+                  href="mailto:futmartcares@gmail.com?subject=Reporting%20a%20Problem"
+                  className="flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                  <span className="text-[11px] text-foreground">Report a Problem</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
     </>
+  );
+}
+
+function FaqItem({ item, expanded, loading, onToggle, showCategory }) {
+  return (
+    <div className="rounded-xl bg-white/5 border border-white/8 overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left"
+      >
+        <div className="flex-1 min-w-0">
+          {showCategory && (
+            <span className="text-[9px] uppercase tracking-wide text-orange-400 font-semibold block mb-0.5">
+              {item.category}
+            </span>
+          )}
+          <span className="text-xs font-medium text-foreground leading-snug">{item.q}</span>
+        </div>
+        {expanded ? (
+          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        ) : (
+          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        )}
+      </button>
+      {expanded && (
+        <div className="px-3 pb-3 -mt-1">
+          {loading ? (
+            <div className="flex items-center gap-1 py-1">
+              {[0, 1, 2].map((d) => (
+                <div key={d} className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: `${d * 0.15}s` }} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted-foreground leading-relaxed" style={{ animation: "futmartFadeIn 0.25s ease forwards" }}>
+              {item.a}
+            </p>
+          )}
+        </div>
+      )}
+      <style>{`
+        @keyframes futmartFadeIn {
+          from { opacity: 0; transform: translateY(2px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
   );
 }
