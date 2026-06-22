@@ -52,7 +52,6 @@ const AuthenticatedApp = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* Public routes — anyone can view these without logging in */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
@@ -60,7 +59,6 @@ const AuthenticatedApp = () => {
         <Route path="/seller/:userId" element={<SellerProfile />} />
       </Route>
 
-      {/* Protected routes — require login */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/chat/:id" element={<ChatRoom />} />
@@ -89,8 +87,7 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        {/* Added basename configuration for clean subfolder routing on GitHub Pages */}
-        <Router basename="/FUTAMART">
+        <Router>
           <AuthenticatedApp />
         </Router>
         <Toaster />
