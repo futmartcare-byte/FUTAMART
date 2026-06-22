@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
 import { useProfile } from "@/lib/useProfile";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import GlassButton from "@/components/GlassButton";
 import {
   ArrowLeft, ChevronRight, User, Briefcase, Shield, Phone, Mail,
@@ -42,15 +41,6 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
 
-  const { data: settings } = useQuery({
-    queryKey: ["user-settings", user?.id],
-    queryFn: async () => {
-      const s = await base44.entities.UserSettings.filter({ created_by_id: user.id });
-      return s[0] || null;
-    },
-    enabled: !!user?.id,
-  });
-
   const [editModal, setEditModal] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [showThemeModal, setShowThemeModal] = useState(false);
@@ -72,17 +62,29 @@ export default function Settings() {
           throw new Error("Username can only be changed once");
         }
         // Check uniqueness
-        const existing = await base44.entities.Profile.filter({ username: value });
+        const { data: existing, error: existErr } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("username", value);
+        if (existErr) throw existErr;
         if (existing.length > 0 && existing[0].id !== profile.id) {
           throw new Error("Username already taken");
         }
-        await base44.entities.Profile.update(profile.id, {
-          [field]: value,
-          username_change_count: (profile.username_change_count || 0) + 1,
-        });
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            [field]: value,
+            username_change_count: (profile.username_change_count || 0) + 1,
+          })
+          .eq("id", profile.id);
+        if (error) throw error;
         return;
       }
-      await base44.entities.Profile.update(profile.id, { [field]: value });
+      const { error } = await supabase
+        .from("profiles")
+        .update({ [field]: value })
+        .eq("id", profile.id);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
@@ -91,16 +93,6 @@ export default function Settings() {
     },
     onError: (err) => toast.error(err.message),
   });
-
-  const updateSettings = useMutation({
-    mutationFn: async (data) => {
-      if (settings) await base44.entities.UserSettings.update(settings.id, data);
-      else await base44.entities.UserSettings.create({ ...data });
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user-settings"] }),
-  });
-
-  const toggle = (key) => updateSettings.mutate({ [key]: !(settings?.[key] ?? true) });
 
   const THEME_OPTIONS = [
     { value: "dark", label: "Dark", icon: Moon },
@@ -208,7 +200,7 @@ export default function Settings() {
           </div>
         </DialogContent>
       </Dialog>
-      
+
       {/* Edit Modal */}
       <Dialog open={!!editModal} onOpenChange={() => setEditModal(null)}>
         <DialogContent className="bg-card border-white/10 max-w-sm">
