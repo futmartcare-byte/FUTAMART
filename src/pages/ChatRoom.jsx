@@ -159,7 +159,6 @@ export default function ChatRoom() {
     enabled: !!id,
   });
 
-  // Realtime: new/updated messages in this chat
   useEffect(() => {
     if (!id) return;
     const channel = supabase
@@ -171,7 +170,6 @@ export default function ChatRoom() {
     return () => { supabase.removeChannel(channel); };
   }, [id, queryClient]);
 
-  // Realtime: chat updates (typing indicator, unread counts)
   useEffect(() => {
     if (!id) return;
     const channel = supabase
@@ -185,7 +183,6 @@ export default function ChatRoom() {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages.length]);
 
-  // Mark incoming messages as read
   useEffect(() => {
     if (!messages.length || !user?.id || !chat) return;
     const unread = messages.filter(m => m.sender_id !== user.id && m.transmission_state !== "read");
@@ -571,7 +568,7 @@ export default function ChatRoom() {
               <button
                 onClick={handleSend}
                 className="shrink-0 h-10 w-10 rounded-full flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #FF6B00, #FF8C00)", boxShadow: "0 3px 10px rgba(255,107,0,0.45)" }}
+                style={{ background: "linear-gradient(135deg, #FF6B00,#FF8C00)", boxShadow: "0 3px 10px rgba(255,107,0,0.45)" }}
               >
                 <Send className="w-4 h-4 text-white" />
               </button>
