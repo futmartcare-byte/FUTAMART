@@ -1,0 +1,60 @@
+{
+  "name": "UserSettings",
+  "type": "object",
+  "properties": {
+    "theme_preference": {
+      "type": "string",
+      "enum": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "default": "system"
+    },
+    "ui_density": {
+      "type": "string",
+      "enum": [
+        "compact",
+        "normal",
+        "relaxed"
+      ],
+      "default": "normal"
+    },
+    "font_size": {
+      "type": "string",
+      "enum": [
+        "sm",
+        "md",
+        "lg"
+      ],
+      "default": "md"
+    },
+    "chat_push_alerts": {
+      "type": "boolean",
+      "default": true
+    },
+    "marketplace_alerts": {
+      "type": "boolean",
+      "default": true
+    },
+    "security_alerts": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

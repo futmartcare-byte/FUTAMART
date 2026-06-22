@@ -1,0 +1,110 @@
+{
+  "name": "Chat",
+  "type": "object",
+  "properties": {
+    "listing_id": {
+      "type": "string",
+      "description": "Related listing ID"
+    },
+    "listing_title": {
+      "type": "string"
+    },
+    "listing_image": {
+      "type": "string"
+    },
+    "listing_price": {
+      "type": "number"
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "Seller user ID"
+    },
+    "seller_name": {
+      "type": "string"
+    },
+    "seller_avatar": {
+      "type": "string"
+    },
+    "buyer_id": {
+      "type": "string",
+      "description": "Buyer user ID"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "buyer_avatar": {
+      "type": "string"
+    },
+    "last_message": {
+      "type": "string"
+    },
+    "last_message_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "unread_count_seller": {
+      "type": "number",
+      "default": 0
+    },
+    "unread_count_buyer": {
+      "type": "number",
+      "default": 0
+    },
+    "typing_user_id": {
+      "type": "string",
+      "description": "ID of user currently typing"
+    },
+    "typing_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Typing expires at this time"
+    }
+  },
+  "required": [
+    "listing_id",
+    "seller_id",
+    "buyer_id"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

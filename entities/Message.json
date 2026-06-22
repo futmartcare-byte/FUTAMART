@@ -1,0 +1,88 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "chat_id": {
+      "type": "string",
+      "description": "Parent chat ID"
+    },
+    "sender_id": {
+      "type": "string",
+      "description": "Sender user ID"
+    },
+    "sender_name": {
+      "type": "string"
+    },
+    "payload_text": {
+      "type": "string"
+    },
+    "attachment_url": {
+      "type": "string"
+    },
+    "attachment_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "image",
+        "document",
+        "voice_note"
+      ],
+      "default": "none"
+    },
+    "transmission_state": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "delivered",
+        "read"
+      ],
+      "default": "sent"
+    },
+    "reply_to_id": {
+      "type": "string",
+      "description": "ID of message being replied to"
+    },
+    "reply_to_text": {
+      "type": "string",
+      "description": "Preview text of replied message"
+    },
+    "reply_to_sender": {
+      "type": "string",
+      "description": "Name of sender being replied to"
+    }
+  },
+  "required": [
+    "chat_id",
+    "sender_id"
+  ],
+  "rls": {
+    "create": {
+      "data.sender_id": "{{user.id}}"
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "data.sender_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.sender_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
