@@ -1,4 +1,4 @@
-const CACHE_NAME = "futamart-v3";
+const CACHE_NAME = "futamart-v1";
 const urlsToCache = ["/"];
 
 self.addEventListener("install", (event) => {
