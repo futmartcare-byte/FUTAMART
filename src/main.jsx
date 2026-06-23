@@ -1,9 +1,8 @@
-import React from 'react'
+﻿import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 
-// Apply saved theme BEFORE rendering to prevent flash
 ;(function initTheme() {
   const saved = localStorage.getItem("futmart-theme") || "dark";
   const root = document.documentElement;
@@ -19,16 +18,17 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <App />
 )
 
-// Register service worker for PWA install support and offline caching
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(
-      (registration) => {
-        console.log('Service worker registered:', registration.scope);
-      },
-      (error) => {
-        console.log('Service worker registration failed:', error);
-      }
-    );
+    navigator.serviceWorker.register('/sw.js').then((registration) => {
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        newWorker?.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            window.dispatchEvent(new CustomEvent('swUpdateAvailable', { detail: registration }));
+          }
+        });
+      });
+    });
   });
 }
