@@ -1,3 +1,4 @@
+@'
 import { useState, useEffect } from "react";
 import { Download, X, RefreshCw } from "lucide-react";
 
@@ -13,9 +14,8 @@ export default function PWAInstallBanner() {
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone;
-    if (isStandalone) { setIsInstalled(true); return; }
+    if (isStandalone) { setIsInstalled(true); }
 
-    // Install banner
     const dismissed = sessionStorage.getItem("futmart-pwa-dismissed");
     const handler = (e) => {
       e.preventDefault();
@@ -24,7 +24,6 @@ export default function PWAInstallBanner() {
     };
     window.addEventListener("beforeinstallprompt", handler);
 
-    // SW update detection
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.getRegistration().then((reg) => {
         if (!reg) return;
@@ -35,10 +34,16 @@ export default function PWAInstallBanner() {
             if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
               setShowInstall(false);
               setShowUpdate(true);
+              setIsInstalled(false);
               setTimeout(() => setVisible(true), 50);
             }
           });
         });
+        if (reg.waiting && navigator.serviceWorker.controller) {
+          setShowUpdate(true);
+          setIsInstalled(false);
+          setTimeout(() => setVisible(true), 50);
+        }
       });
     }
 
@@ -66,7 +71,7 @@ export default function PWAInstallBanner() {
     sessionStorage.setItem("futmart-pwa-dismissed", "1");
   };
 
-  if (isInstalled || (!showInstall && !showUpdate)) return null;
+  if (!showInstall && !showUpdate) return null;
 
   return (
     <div
@@ -97,7 +102,7 @@ export default function PWAInstallBanner() {
           </p>
           <p className="text-[11px] text-muted-foreground mt-0.5">
             {showUpdate
-              ? "A new version of FutaMart is available."
+              ? "A new version of FutaMart is ready."
               : "Faster access, notifications & better experience."}
           </p>
         </div>
@@ -121,3 +126,4 @@ export default function PWAInstallBanner() {
     </div>
   );
 }
+'@ | Out-File -FilePath src\components\PWAInstallBanner.jsx -Encoding utf8
