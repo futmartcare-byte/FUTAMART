@@ -1,0 +1,1 @@
+const fs=require('fs');let c=fs.readFileSync('src/App.jsx','utf8');c=c.replace('<style>{','<style>{'+String.fromCharCode(96));c=c.replace('}</style>',String.fromCharCode(96)+'}</style>');fs.writeFileSync('src/App.jsx',c,'utf8');console.log('done');

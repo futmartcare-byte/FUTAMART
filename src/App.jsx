@@ -48,13 +48,13 @@ const AuthenticatedApp = () => {
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background overflow-hidden">
-        <style>{\
+        <style>{`
           @keyframes futmartPopIn {
             0% { opacity: 0; transform: scale(0.6); }
             60% { opacity: 1; transform: scale(1.08); }
             100% { opacity: 1; transform: scale(1); }
           }
-          .futmart-logo-pop {
+        `}</style>
             animation: futmartPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
         \}</style>
