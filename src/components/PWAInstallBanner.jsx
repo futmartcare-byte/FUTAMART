@@ -39,6 +39,7 @@ export default function PWAInstallBanner() {
           return;
         }
 
+        window.addEventListener("swUpdateAvailable", () => { setShowInstall(false); setShowUpdate(true); setTimeout(() => setVisible(true), 50); });
         reg.addEventListener("updatefound", () => {
           const newWorker = reg.installing;
           newWorker?.addEventListener("statechange", () => {

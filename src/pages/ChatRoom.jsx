@@ -453,7 +453,7 @@ export default function ChatRoom() {
       // and without this guard the whole app crashes to a blank screen.
       const isMe = msg.sender_id === user?.id;
       const isRead = msg.transmission_state === "read";
-      const isDelivered = isRead || !!otherProfile?.is_online;
+      const isDelivered = msg.transmission_state === "delivered" || isRead;
 
       items.push(
         <SwipeMessage
