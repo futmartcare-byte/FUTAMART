@@ -242,7 +242,7 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
 
       const rows = targets.map(p => ({ ...payload, user_id: p.id }));
       const { error } = await supabase.from("notifications").insert(rows);
-      if (error) throw error;
+      if (error) { console.error("NOTIF ERROR:", JSON.stringify(error)); throw new Error(error.message); }
       return targets.length;
     },
     onSuccess: (count) => {
@@ -582,3 +582,4 @@ export default function Admin() {
     </div>
   );
 }
+
