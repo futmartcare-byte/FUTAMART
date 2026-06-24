@@ -7,7 +7,7 @@ const corsHeaders = {
 
 const SERVICE_ACCOUNT = {
   project_id: 'futamart-1',
-  private_key: Deno.env.get('GOOGLE_PRIVATE_KEY') ?? '',
+  private_key: (Deno.env.get('GOOGLE_PRIVATE_KEY') ?? '').replace(/\\n/g, '\n'),
   client_email: 'firebase-adminsdk-fbsvc@futamart-1.iam.gserviceaccount.com',
 };
 
