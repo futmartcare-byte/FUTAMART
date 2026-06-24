@@ -12,7 +12,19 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-const CACHE_NAME = 'futamart-v6';
+messaging.onBackgroundMessage((payload) => {
+  self.registration.getNotifications().then((notifications) => {
+    notifications.forEach((n) => n.close());
+  });
+  self.registration.showNotification(payload.notification.title, {
+    body: payload.notification.body,
+    icon: 'https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/5bd4ffbb9_QjhED.jpg',
+    tag: 'futamart-msg',
+    renotify: true,
+  });
+});
+
+const CACHE_NAME = 'futamart-v7';
 const urlsToCache = ['/', '/index.html'];
 
 self.addEventListener('install', (event) => {
@@ -40,7 +52,7 @@ self.addEventListener('notificationclick', (event) => {
       for (const client of clientList) {
         if (client.url.includes('futamart') && 'focus' in client) return client.focus();
       }
-      if (clients.openWindow) return clients.openWindow('/');
+      if (clients.openWindow) return clients.openWindow('/chats');
     })
   );
 });
