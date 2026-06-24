@@ -1,4 +1,4 @@
-﻿import { initializeApp } from "firebase/app";
+import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
@@ -33,9 +33,25 @@ export async function sendChatNotification(toUserId, fromUsername, message, supa
   try {
     const { data } = await supabase.from("push_tokens").select("token").eq("user_id", toUserId).single();
     if (!data?.token) return;
-    await supabase.functions.invoke("send-notification", {
-      body: { token: data.token, title: "FutaMart • " + fromUsername, body: message.length > 80 ? message.slice(0, 80) + "..." : message },
+
+    const session = await supabase.auth.getSession();
+    const accessToken = session.data.session?.access_token;
+
+    const res = await fetch("https://nuigjwriojnzkehlgbrh.supabase.co/functions/v1/send-notification", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + accessToken,
+      },
+      body: JSON.stringify({
+        token: data.token,
+        title: "FutaMart • " + fromUsername,
+        body: message.length > 80 ? message.slice(0, 80) + "..." : message,
+      }),
     });
+
+    const result = await res.json();
+    console.log("Notification result:", result);
   } catch (err) {
     console.error("Send notification error:", err);
   }
