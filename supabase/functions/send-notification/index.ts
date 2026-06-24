@@ -7,7 +7,7 @@ const corsHeaders = {
 
 const SERVICE_ACCOUNT = {
   project_id: 'futamart-1',
-  private_key: (Deno.env.get('GOOGLE_PRIVATE_KEY') ?? '').replace(/\\n/g, '\n'),
+  private_key: '-----BEGIN PRIVATE KEY-----\n' + (Deno.env.get('GOOGLE_PRIVATE_KEY') ?? '') + '\n-----END PRIVATE KEY-----\n',
   client_email: 'firebase-adminsdk-fbsvc@futamart-1.iam.gserviceaccount.com',
 };
 
@@ -21,10 +21,7 @@ async function getAccessToken(): Promise<string> {
     exp: now + 3600,
     iat: now,
   }));
-  const pemContents = SERVICE_ACCOUNT.private_key
-    .replace('-----BEGIN PRIVATE KEY-----', '')
-    .replace('-----END PRIVATE KEY-----', '')
-    .replace(/\n/g, '');
+  const pemContents = (Deno.env.get('GOOGLE_PRIVATE_KEY') ?? '').replace(/\s/g, '');
   const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
   const cryptoKey = await crypto.subtle.importKey(
     'pkcs8', binaryKey.buffer,
