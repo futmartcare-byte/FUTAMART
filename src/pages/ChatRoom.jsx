@@ -238,6 +238,27 @@ export default function ChatRoom() {
     enabled: !!otherId,
     refetchInterval: 15000,
   });
+  useEffect(() => {
+    if (!otherId) return;
+    const channel = supabase
+      .channel(`presence-${otherId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${otherId}` },
+        () => queryClient.invalidateQueries({ queryKey: ["other-profile", otherId] })
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [otherId, queryClient]);
+
+  useEffect(() => {
+    if (!otherId) return;
+    const channel = supabase
+      .channel(`presence-${otherId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${otherId}` },
+        () => queryClient.invalidateQueries({ queryKey: ["other-profile", otherId] })
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [otherId, queryClient]);
 
   const { data: myProfile } = useQuery({
     queryKey: ["my-profile-chat", user?.id],
