@@ -13,9 +13,11 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body,
+  const { title, body } = payload.notification;
+  self.registration.showNotification(title, {
+    body,
     icon: 'https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/5bd4ffbb9_QjhED.jpg',
-    vibrate: [200, 100, 200],
+    tag: 'futamart-chat',
+    renotify: false,
   });
 });
