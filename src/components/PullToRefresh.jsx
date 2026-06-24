@@ -1,9 +1,9 @@
-import { useRef, useState, useCallback } from "react";
+﻿import { useRef, useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 
 const PULL_THRESHOLD = 70;
-const MAX_PULL = 110;
+const MAX_PULL = 100;
 
 export default function PullToRefresh({ children }) {
   const queryClient = useQueryClient();
@@ -24,7 +24,7 @@ export default function PullToRefresh({ children }) {
     if (!pullingRef.current || startYRef.current === null) return;
     const delta = e.touches[0].clientY - startYRef.current;
     if (delta <= 0) { setPullDistance(0); return; }
-    const eased = Math.min(MAX_PULL, delta * 0.5);
+    const eased = Math.min(MAX_PULL, delta * 0.4);
     setPullDistance(eased);
   }, []);
 
@@ -35,7 +35,7 @@ export default function PullToRefresh({ children }) {
 
     if (pullDistance >= PULL_THRESHOLD) {
       setIsRefreshing(true);
-      setPullDistance(PULL_THRESHOLD);
+      setPullDistance(PULL_THRESHOLD * 0.6);
       if (navigator.vibrate) navigator.vibrate(20);
       try {
         await queryClient.invalidateQueries();
@@ -51,6 +51,8 @@ export default function PullToRefresh({ children }) {
   }, [pullDistance, queryClient]);
 
   const progress = Math.min(1, pullDistance / PULL_THRESHOLD);
+  const spinnerOffset = isRefreshing ? PULL_THRESHOLD * 0.6 : pullDistance;
+  const contentShift = isRefreshing ? PULL_THRESHOLD * 0.35 : pullDistance * 0.35;
 
   return (
     <div
@@ -58,25 +60,34 @@ export default function PullToRefresh({ children }) {
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      style={{ overscrollBehaviorY: "contain" }}
+      style={{ overscrollBehaviorY: "contain", position: "relative" }}
     >
       <div
-        className="flex items-center justify-center overflow-hidden transition-[height] duration-200"
-        style={{ height: isRefreshing ? PULL_THRESHOLD : pullDistance }}
+        className="absolute left-0 right-0 flex items-center justify-center pointer-events-none transition-transform duration-200"
+        style={{
+          top: 8,
+          transform: `translateY(${spinnerOffset - 36}px)`,
+          opacity: isRefreshing ? 1 : progress,
+          zIndex: 30,
+        }}
       >
         <div
-          className="w-9 h-9 rounded-full flex items-center justify-center shadow-lg"
+          className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg"
           style={{
             background: "linear-gradient(160deg, #FF6B00 0%, #FF8C00 50%, #FFB000 100%)",
-            boxShadow: "0 4px 14px rgba(255,107,0,0.5)",
-            transform: `rotate(${progress * 360}deg)`,
-            opacity: progress,
+            boxShadow: "0 4px 14px rgba(255,107,0,0.45)",
+            transform: isRefreshing ? "none" : `rotate(${progress * 360}deg) scale(${0.7 + progress * 0.3})`,
           }}
         >
           <RefreshCw className={`w-4 h-4 text-white ${isRefreshing ? "animate-spin" : ""}`} strokeWidth={2.5} />
         </div>
       </div>
-      {children}
+      <div
+        className="transition-transform duration-200"
+        style={{ transform: `translateY(${contentShift}px)` }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
