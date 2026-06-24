@@ -19,9 +19,15 @@ export async function requestNotificationPermission(userId, supabase) {
   try {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return null;
-    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+
+    const registration = await navigator.serviceWorker.register('/sw.js');
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
     if (!token) return null;
-    await supabase.from("push_tokens").upsert({ user_id: userId, token, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+
+    await supabase.from("push_tokens").upsert(
+      { user_id: userId, token, updated_at: new Date().toISOString() },
+      { onConflict: "user_id" }
+    );
     return token;
   } catch (err) {
     console.error("Notification permission error:", err);
