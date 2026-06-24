@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import PWAInstallBanner from "./PWAInstallBanner";
+import PullToRefresh from "./PullToRefresh";
 import { useOnlinePresence } from "@/lib/useOnlinePresence";
 import GlobalNotificationSystem from "./notification/GlobalNotificationSystem";
 
@@ -16,9 +17,11 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen max-w-lg mx-auto" style={{ background: "transparent" }}>
       <PresenceWrapper />
-      <main className={hideNav ? "" : "pb-20"}>
-        <Outlet />
-      </main>
+      <PullToRefresh>
+        <main className={hideNav ? "" : "pb-20"}>
+          <Outlet />
+        </main>
+      </PullToRefresh>
       {!hideNav && <BottomNav />}
       <PWAInstallBanner />
       <GlobalNotificationSystem />

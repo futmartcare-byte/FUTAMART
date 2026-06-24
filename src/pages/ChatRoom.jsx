@@ -184,8 +184,7 @@ export default function ChatRoom() {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages.length]);
 
-  // STAGE 1: as soon as an incoming message reaches this device, mark it "delivered"
-  // (single grey tick -> double grey tick), regardless of whether the chat is focused.
+  // STAGE 1: as soon as an incoming message reaches this device, mark it "delivered".
   useEffect(() => {
     if (!messages.length || !user?.id) return;
     const toDeliver = messages.filter(m => m.sender_id !== user.id && m.transmission_state === "sent");
@@ -193,9 +192,7 @@ export default function ChatRoom() {
     supabase.from("messages").update({ transmission_state: "delivered" }).in("id", toDeliver.map(m => m.id));
   }, [messages.length, user?.id]);
 
-  // STAGE 2: mark messages "read" (double tick turns blue) only while this chat is
-  // actually open AND the tab/app is visible — just like WhatsApp won't send a read
-  // receipt while the app is backgrounded.
+  // STAGE 2: mark messages "read" only while this chat is open AND the tab/app is visible.
   const markAsRead = useCallback(() => {
     if (!messages.length || !user?.id || !chat) return;
     if (document.hidden) return;
@@ -213,8 +210,6 @@ export default function ChatRoom() {
   }, [messages, user?.id, chat, queryClient]);
 
   useEffect(() => {
-    // small delay so the grey double-tick is visible for a beat before turning blue,
-    // matching the natural feel of WhatsApp instead of an instant jump
     const timer = setTimeout(markAsRead, 700);
     return () => clearTimeout(timer);
   }, [messages.length, chat?.id, markAsRead]);
@@ -238,17 +233,8 @@ export default function ChatRoom() {
     enabled: !!otherId,
     refetchInterval: 15000,
   });
-  useEffect(() => {
-    if (!otherId) return;
-    const channel = supabase
-      .channel(`presence-${otherId}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${otherId}` },
-        () => queryClient.invalidateQueries({ queryKey: ["other-profile", otherId] })
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [otherId, queryClient]);
 
+  // single realtime listener — keeps the other person's online status live
   useEffect(() => {
     if (!otherId) return;
     const channel = supabase
@@ -463,9 +449,11 @@ export default function ChatRoom() {
         items.push(<DateSeparator key={`sep-${idx}`} date={msgDate} />);
         lastDate = msgDate;
       }
-      const isMe = msg.sender_id === user.id;
+      // FIX: optional chaining — user can briefly be null on refresh while auth rehydrates,
+      // and without this guard the whole app crashes to a blank screen.
+      const isMe = msg.sender_id === user?.id;
       const isRead = msg.transmission_state === "read";
-      const isDelivered = msg.transmission_state === "delivered" || isRead;
+      const isDelivered = isRead || !!otherProfile?.is_online;
 
       items.push(
         <SwipeMessage
@@ -520,6 +508,14 @@ export default function ChatRoom() {
     });
     return items;
   };
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="w-6 h-6 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen max-w-lg mx-auto">
