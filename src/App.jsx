@@ -4,7 +4,6 @@ import { queryClientInstance } from "@/lib/query-client";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import PageNotFound from "./lib/PageNotFound";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
-import UserNotRegisteredError from "@/components/UserNotRegisteredError";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useEffect } from "react";
 import { requestNotificationPermission } from "@/lib/firebase";
@@ -14,7 +13,6 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
-
 import AppLayout from "@/components/AppLayout";
 import Home from "@/pages/Home";
 import Search from "@/pages/Search";
@@ -48,21 +46,12 @@ const AuthenticatedApp = () => {
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background overflow-hidden">
-        <style>{`
-          @keyframes futmartPopIn {
-            0% { opacity: 0; transform: scale(0.6); }
-            60% { opacity: 1; transform: scale(1.08); }
-            100% { opacity: 1; transform: scale(1); }
-          }
-        `}</style>
-            animation: futmartPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-          }
-        \}</style>
         <div className="flex flex-col items-center gap-4">
           <img
             src="https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/5bd4ffbb9_QjhED.jpg"
             alt="FUTAMART"
-            className="w-24 h-24 rounded-2xl shadow-2xl futmart-logo-pop"
+            className="w-24 h-24 rounded-2xl shadow-2xl"
+            style={{ animation: "futmartPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" }}
           />
           <span className="text-sm text-muted-foreground font-display tracking-wide">FUTAMART</span>
           <div className="w-6 h-6 border-2 border-orange-400 border-t-transparent rounded-full animate-spin mt-1" />
@@ -77,18 +66,15 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route path="/listing/:id" element={<ListingDetail />} />
         <Route path="/seller/:userId" element={<SellerProfile />} />
       </Route>
-
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/chat/:id" element={<ChatRoom />} />
-
         <Route element={<AppLayout />}>
           <Route path="/create-listing" element={<CreateListing />} />
           <Route path="/edit-listing/:id" element={<EditListing />} />
@@ -103,7 +89,6 @@ const AuthenticatedApp = () => {
           <Route path="/onboarding-edit" element={<ProfileEdit />} />
         </Route>
       </Route>
-
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
