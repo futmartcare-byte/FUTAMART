@@ -1,19 +1,19 @@
-import { LogOut, LogOut, useState } from "react";
-import { LogOut, LogOut, useNavigate } from "react-router-dom";
-import { LogOut, LogOut, useMutation, useQueryClient } from "@tanstack/react-query";
-import { LogOut, LogOut, supabase } from "@/api/supabaseClient";
-import { LogOut, LogOut, useAuth } from "@/lib/AuthContext";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/api/supabaseClient";
+import { useAuth } from "@/lib/AuthContext";
 import { LogOut, useProfile } from "@/lib/useProfile";
-import { LogOut, LogOut, Switch } from "@/components/ui/switch";
-import { LogOut, LogOut, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { LogOut, LogOut, Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import GlassButton from "@/components/GlassButton";
 import { LogOut, LogOut,
   ArrowLeft, ChevronRight, User, Briefcase, Shield, Phone, Mail,
   Share2, MessageSquareOff, BellOff, Bell, Palette, Lock, Sun, Moon, Monitor, Crown, Volume2
 } from "lucide-react";
-import { LogOut, LogOut, toast } from "sonner";
-import { LogOut, LogOut, useTheme } from "@/lib/useTheme";
+import { toast } from "sonner";
+import { useTheme } from "@/lib/useTheme";
 
 const ADMIN_EMAIL = "futmartzite@gmail.com";
 
@@ -235,6 +235,8 @@ export default function Settings() {
     </div>
   );
 }
+
+
 
 
 
