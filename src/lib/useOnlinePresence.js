@@ -1,32 +1,31 @@
 import { useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
-import { useProfile } from "@/lib/useProfile";
+import { supabase } from "@/api/supabaseClient";
+import { useAuth } from "@/lib/AuthContext";
 
-const HEARTBEAT_INTERVAL = 30000;
-const INACTIVE_TIMEOUT = 120000;
+const HEARTBEAT_INTERVAL = 15000;
+const INACTIVE_TIMEOUT = 60000;
 
 export function useOnlinePresence() {
-  const { data: profile } = useProfile();
-  const profileIdRef = useRef(null);
+  const { user } = useAuth();
+  const userIdRef = useRef(null);
   const lastActivityRef = useRef(Date.now());
   const intervalRef = useRef(null);
 
-  // Keep profileId ref in sync
   useEffect(() => {
-    profileIdRef.current = profile?.id || null;
-  }, [profile?.id]);
+    userIdRef.current = user?.id || null;
+  }, [user?.id]);
 
   useEffect(() => {
     const setOnline = async (isOnline) => {
-      const pid = profileIdRef.current;
-      if (!pid) return;
+      const uid = userIdRef.current;
+      if (!uid) return;
       try {
-        await base44.entities.Profile.update(pid, {
+        await supabase.from("profiles").update({
           is_online: isOnline,
           last_seen: new Date().toISOString(),
-        });
+        }).eq("id", uid);
       } catch {
-        // silently ignore — presence is best-effort
+        // silently ignore
       }
     };
 
@@ -39,21 +38,35 @@ export function useOnlinePresence() {
       setOnline(idle < INACTIVE_TIMEOUT);
     }, HEARTBEAT_INTERVAL);
 
-    const events = ["mousemove", "keydown", "touchstart", "scroll", "click"];
+    const events = ["mousemove", "keydown", "touchstart", "scroll", "click", "pointermove"];
     events.forEach(e => window.addEventListener(e, resetActivity, { passive: true }));
 
     const handleVisibility = () => {
-      if (document.hidden) setOnline(false);
-      else { resetActivity(); setOnline(true); }
+      if (document.hidden) {
+        setOnline(false);
+      } else {
+        resetActivity();
+        setOnline(true);
+      }
     };
     document.addEventListener("visibilitychange", handleVisibility);
-    window.addEventListener("beforeunload", () => setOnline(false));
+
+    const handleUnload = () => setOnline(false);
+    window.addEventListener("beforeunload", handleUnload);
+
+    const handleOffline = () => setOnline(false);
+    const handleOnline = () => { resetActivity(); setOnline(true); };
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
 
     return () => {
       clearInterval(intervalRef.current);
       events.forEach(e => window.removeEventListener(e, resetActivity));
       document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("beforeunload", handleUnload);
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
       setOnline(false);
     };
-  }, []); // run once — uses refs to stay current
+  }, []);
 }
