@@ -184,8 +184,21 @@ export default function ChatRoom() {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages.length]);
 
+  // STAGE 1: as soon as an incoming message reaches this device, mark it "delivered"
+  // (single grey tick -> double grey tick), regardless of whether the chat is focused.
   useEffect(() => {
+    if (!messages.length || !user?.id) return;
+    const toDeliver = messages.filter(m => m.sender_id !== user.id && m.transmission_state === "sent");
+    if (!toDeliver.length) return;
+    supabase.from("messages").update({ transmission_state: "delivered" }).in("id", toDeliver.map(m => m.id));
+  }, [messages.length, user?.id]);
+
+  // STAGE 2: mark messages "read" (double tick turns blue) only while this chat is
+  // actually open AND the tab/app is visible — just like WhatsApp won't send a read
+  // receipt while the app is backgrounded.
+  const markAsRead = useCallback(() => {
     if (!messages.length || !user?.id || !chat) return;
+    if (document.hidden) return;
     const unread = messages.filter(m => m.sender_id !== user.id && m.transmission_state !== "read");
     if (!unread.length) return;
     (async () => {
@@ -197,7 +210,20 @@ export default function ChatRoom() {
         .eq("id", chat.id);
       queryClient.invalidateQueries({ queryKey: ["chats-unread"] });
     })();
-  }, [messages.length, chat?.id]);
+  }, [messages, user?.id, chat, queryClient]);
+
+  useEffect(() => {
+    // small delay so the grey double-tick is visible for a beat before turning blue,
+    // matching the natural feel of WhatsApp instead of an instant jump
+    const timer = setTimeout(markAsRead, 700);
+    return () => clearTimeout(timer);
+  }, [messages.length, chat?.id, markAsRead]);
+
+  useEffect(() => {
+    const handleVisibility = () => { if (!document.hidden) markAsRead(); };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [markAsRead]);
 
   const otherName = chat?.seller_id === user?.id ? chat?.buyer_name : chat?.seller_name;
   const otherId = chat?.seller_id === user?.id ? chat?.buyer_id : chat?.seller_id;
@@ -269,7 +295,8 @@ export default function ChatRoom() {
         .eq("id", chat.id);
       if (chatError) throw chatError;
 
-      const receiverId = chat?.seller_id === user.id ? chat?.buyer_id : chat?.seller_id; await sendChatNotification(receiverId, chat?.seller_id === user.id ? chat.seller_name : chat.buyer_name, msgData.payload_text || "Sent you a message", supabase);
+      const receiverId = chat?.seller_id === user.id ? chat?.buyer_id : chat?.seller_id;
+      await sendChatNotification(receiverId, chat?.seller_id === user.id ? chat.seller_name : chat.buyer_name, msgData.payload_text || "Sent you a message", supabase);
       return newMsg;
     },
     onSuccess: () => {
