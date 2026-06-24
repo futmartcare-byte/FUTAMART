@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { sendChatNotification } from "@/lib/firebase";
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = "futmart_listings";
@@ -268,6 +269,7 @@ export default function ChatRoom() {
         .eq("id", chat.id);
       if (chatError) throw chatError;
 
+      await sendChatNotification(otherId, chat?.seller_id === user.id ? chat.seller_name : chat.buyer_name, msgData.payload_text || "Sent you a message", supabase);
       return newMsg;
     },
     onSuccess: () => {

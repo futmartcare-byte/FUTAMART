@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
+﻿import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClientInstance } from "@/lib/query-client";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
@@ -6,6 +6,9 @@ import PageNotFound from "./lib/PageNotFound";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
 import UserNotRegisteredError from "@/components/UserNotRegisteredError";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useEffect } from "react";
+import { requestNotificationPermission } from "@/lib/firebase";
+import { supabase } from "@/api/supabaseClient";
 
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -32,12 +35,20 @@ import ReportPage from "@/pages/ReportPage";
 import ProfileEdit from "@/pages/ProfileEdit";
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, user } = useAuth();
+
+  useEffect(() => {
+    if (user?.id) {
+      setTimeout(() => {
+        requestNotificationPermission(user.id, supabase);
+      }, 3000);
+    }
+  }, [user?.id]);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background overflow-hidden">
-        <style>{`
+        <style>{\
           @keyframes futmartPopIn {
             0% { opacity: 0; transform: scale(0.6); }
             60% { opacity: 1; transform: scale(1.08); }
@@ -46,7 +57,7 @@ const AuthenticatedApp = () => {
           .futmart-logo-pop {
             animation: futmartPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
-        `}</style>
+        \}</style>
         <div className="flex flex-col items-center gap-4">
           <img
             src="https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/5bd4ffbb9_QjhED.jpg"
