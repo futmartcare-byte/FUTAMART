@@ -1,44 +1,46 @@
 ﻿import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { create, getNumericDate } from 'https://deno.land/x/djwt@v2.8/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SERVICE_ACCOUNT = {
-  project_id: 'futamart-1',
-  private_key: '-----BEGIN PRIVATE KEY-----\n' + (Deno.env.get('GOOGLE_PRIVATE_KEY') ?? '') + '\n-----END PRIVATE KEY-----\n',
-  client_email: 'firebase-adminsdk-fbsvc@futamart-1.iam.gserviceaccount.com',
-};
-
 async function getAccessToken(): Promise<string> {
-  const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-  const now = Math.floor(Date.now() / 1000);
-  const claim = btoa(JSON.stringify({
-    iss: SERVICE_ACCOUNT.client_email,
-    scope: 'https://www.googleapis.com/auth/firebase.messaging',
-    aud: 'https://oauth2.googleapis.com/token',
-    exp: now + 3600,
-    iat: now,
-  }));
-  const pemContents = (Deno.env.get('GOOGLE_PRIVATE_KEY') ?? '').replace(/\s/g, '');
+  const privateKeyStr = (Deno.env.get('GOOGLE_PRIVATE_KEY') ?? '').replace(/\\n/g, '\n');
+  const pemContents = privateKeyStr
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '')
+    .replace(/\s/g, '');
+
   const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
   const cryptoKey = await crypto.subtle.importKey(
-    'pkcs8', binaryKey.buffer,
+    'pkcs8',
+    binaryKey.buffer,
     { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false, ['sign']
+    false,
+    ['sign']
   );
-  const signingInput = header + '.' + claim;
-  const signature = await crypto.subtle.sign(
-    'RSASSA-PKCS1-v1_5', cryptoKey,
-    new TextEncoder().encode(signingInput)
+
+  const now = getNumericDate(0);
+  const jwt = await create(
+    { alg: 'RS256', typ: 'JWT' },
+    {
+      iss: 'firebase-adminsdk-fbsvc@futamart-1.iam.gserviceaccount.com',
+      scope: 'https://www.googleapis.com/auth/firebase.messaging',
+      aud: 'https://oauth2.googleapis.com/token',
+      exp: getNumericDate(3600),
+      iat: now,
+    },
+    cryptoKey
   );
-  const jwt = signingInput + '.' + btoa(String.fromCharCode(...new Uint8Array(signature)));
+
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=' + jwt,
   });
+
   const tokenData = await tokenRes.json();
   return tokenData.access_token;
 }
