@@ -269,7 +269,7 @@ export default function ChatRoom() {
         .eq("id", chat.id);
       if (chatError) throw chatError;
 
-      await sendChatNotification(otherId, chat?.seller_id === user.id ? chat.seller_name : chat.buyer_name, msgData.payload_text || "Sent you a message", supabase);
+      const receiverId = chat?.seller_id === user.id ? chat?.buyer_id : chat?.seller_id; await sendChatNotification(receiverId, chat?.seller_id === user.id ? chat.seller_name : chat.buyer_name, msgData.payload_text || "Sent you a message", supabase);
       return newMsg;
     },
     onSuccess: () => {
