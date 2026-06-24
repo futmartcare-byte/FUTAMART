@@ -3,7 +3,7 @@ import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
 
 const HEARTBEAT_INTERVAL = 15000;
-const INACTIVE_TIMEOUT = 60000;
+const INACTIVE_TIMEOUT = 30000;
 
 export function useOnlinePresence() {
   const { user } = useAuth();
@@ -70,3 +70,4 @@ export function useOnlinePresence() {
     };
   }, []);
 }
+

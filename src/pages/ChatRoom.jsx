@@ -231,7 +231,7 @@ export default function ChatRoom() {
       return data;
     },
     enabled: !!otherId,
-    refetchInterval: 15000,
+    refetchInterval: 5000,
   });
 
   // single realtime listener — keeps the other person's online status live
@@ -644,3 +644,5 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
