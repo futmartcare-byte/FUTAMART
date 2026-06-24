@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/api/supabaseClient";
-import { useAuth } from "@/lib/AuthContext";
-import { useProfile } from "@/lib/useProfile";
-import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { LogOut, LogOut, useState } from "react";
+import { LogOut, LogOut, useNavigate } from "react-router-dom";
+import { LogOut, LogOut, useMutation, useQueryClient } from "@tanstack/react-query";
+import { LogOut, LogOut, supabase } from "@/api/supabaseClient";
+import { LogOut, LogOut, useAuth } from "@/lib/AuthContext";
+import { LogOut, useProfile } from "@/lib/useProfile";
+import { LogOut, LogOut, Switch } from "@/components/ui/switch";
+import { LogOut, LogOut, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { LogOut, LogOut, Input } from "@/components/ui/input";
 import GlassButton from "@/components/GlassButton";
-import {
+import { LogOut, LogOut,
   ArrowLeft, ChevronRight, User, Briefcase, Shield, Phone, Mail,
   Share2, MessageSquareOff, BellOff, Bell, Palette, Lock, Sun, Moon, Monitor, Crown, Volume2
 } from "lucide-react";
-import { toast } from "sonner";
-import { useTheme } from "@/lib/useTheme";
+import { LogOut, LogOut, toast } from "sonner";
+import { LogOut, LogOut, useTheme } from "@/lib/useTheme";
 
 const ADMIN_EMAIL = "futmartzite@gmail.com";
 
@@ -168,6 +168,18 @@ export default function Settings() {
         </div>
 
         {/* Pro */}
+        {/* Logout */}
+        <div>
+          <SectionLabel>Account Actions</SectionLabel>
+          <button
+            onClick={async () => { await supabase.auth.signOut(); navigate("/login"); }}
+            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl glass hover:brightness-110 active:scale-[0.99] transition-all text-left"
+            style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.08))" }}
+          >
+            <LogOut className="w-5 h-5 text-red-400 shrink-0" />
+            <span className="flex-1 text-sm font-body text-red-400">Log out</span>
+          </button>
+        </div>
         <div>
           <SectionLabel>Pro</SectionLabel>
           <SettingRow icon={Crown} label="Pro Seller Plan" badge="Coming Soon" onClick={() => navigate("/pro-upgrade")} />
@@ -223,3 +235,6 @@ export default function Settings() {
     </div>
   );
 }
+
+
+
