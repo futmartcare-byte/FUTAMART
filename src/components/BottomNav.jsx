@@ -2,12 +2,14 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Bookmark, MessageSquare, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/AuthContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
+import { useEffect } from "react";
 
 export default function BottomNav() {
   const location = useLocation();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["chats-unread", user?.id],
@@ -24,8 +26,19 @@ export default function BottomNav() {
       }, 0);
     },
     enabled: !!user?.id,
-    refetchInterval: 10000,
+    refetchInterval: 5000,
   });
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`bottomnav-chats-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "chats" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["chats-unread", user.id] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, queryClient]);
 
   const NAV_LEFT = [
     { path: "/", icon: Home, label: "Home" },
