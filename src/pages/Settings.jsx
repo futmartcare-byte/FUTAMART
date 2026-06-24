@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
-import { LogOut, useProfile } from "@/lib/useProfile";
+import { useProfile } from "@/lib/useProfile";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import GlassButton from "@/components/GlassButton";
-import { LogOut, LogOut,
+import { LogOut,
   ArrowLeft, ChevronRight, User, Briefcase, Shield, Phone, Mail,
   Share2, MessageSquareOff, BellOff, Bell, Palette, Lock, Sun, Moon, Monitor, Crown, Volume2
 } from "lucide-react";
@@ -235,6 +235,9 @@ export default function Settings() {
     </div>
   );
 }
+
+
+
 
 
 
