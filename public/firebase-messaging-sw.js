@@ -10,14 +10,4 @@ firebase.initializeApp({
   appId: '1:507410495541:web:bea85b78bfdfb03a74597c'
 });
 
-const messaging = firebase.messaging();
-
-messaging.onBackgroundMessage((payload) => {
-  const { title, body } = payload.notification;
-  self.registration.showNotification(title, {
-    body,
-    icon: 'https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/5bd4ffbb9_QjhED.jpg',
-    tag: 'futamart-chat',
-    renotify: false,
-  });
-});
+firebase.messaging();
