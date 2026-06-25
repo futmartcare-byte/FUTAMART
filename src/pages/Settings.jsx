@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
@@ -13,9 +13,7 @@ import { LogOut,
   Share2, MessageSquareOff, BellOff, Bell, Palette, Lock, Sun, Moon, Monitor, Crown, Volume2
 } from "lucide-react";
 import { toast } from "sonner";
-import { useTheme } from "@/lib/useTheme";
-
-const ADMIN_EMAIL = "futmartzite@gmail.com";
+import { useTheme } from "@/lib/useTheme";const ADMIN_EMAIL = "futmartzite@gmail.com";
 
 const SettingRow = ({ icon: Icon, label, badge, right, onClick }) => (
   <button
@@ -235,6 +233,8 @@ export default function Settings() {
     </div>
   );
 }
+
+
 
 
 
