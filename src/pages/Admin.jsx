@@ -382,6 +382,7 @@ function UsersTab({ profiles, onAction }) {
           </GlassCard>
         ))}
       </div>
+      {spectating && <SpectateChatsModal profile={spectating} onClose={() => setSpectating(null)} />}
     </div>
   );
 }
