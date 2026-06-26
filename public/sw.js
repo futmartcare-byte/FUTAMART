@@ -46,13 +46,18 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Network-first for HTML navigation requests (always get latest app shell)
-  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
+  if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
+      caches.match(request)
+        .then((cached) => {
+          if (cached) return cached;
+          return fetch(request)
+            .then((response) => {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+              return response;
+            })
+            .catch(() => caches.match('/offline.html'));
         })
         .catch(() => caches.match('/offline.html'))
     );
