@@ -128,7 +128,7 @@ export default function SellerProfile() {
         <button onClick={() => navigate(-1)}><ArrowLeft className="w-5 h-5" /></button>
         <h1 className="text-lg font-heading font-bold flex-1">Seller Profile</h1>
         {!isSelf && (
-          <Link to={`/report?type=seller&id=${userId}&name=${encodeURIComponent(profile.full_name || profile.username)}`}
+          <Link to={`/report2?type=seller&id=${userId}&name=${encodeURIComponent(profile.full_name || profile.username)}`}
             className="p-2 rounded-full bg-secondary">
             <Flag className="w-4 h-4 text-red-400" />
           </Link>

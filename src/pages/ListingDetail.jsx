@@ -245,7 +245,7 @@ export default function ListingDetail() {
           <div className="flex items-start justify-between gap-2">
             <h1 className="text-xl font-bold text-foreground leading-tight flex-1">{listing.title}</h1>
             {!isOwner && (
-              <Link to={`/report?type=listing&id=${listing.id}&name=${encodeURIComponent(listing.title)}`}>
+              <Link to={`/report2?type=listing&id=${listing.id}&name=${encodeURIComponent(listing.title)}`}>
                 <Flag className="w-4 h-4 text-muted-foreground mt-1" />
               </Link>
             )}
