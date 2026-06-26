@@ -120,6 +120,8 @@ export default function ChatRoom() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const isSpectating = searchParams.get("spectate") === "1";
+  const [searchParams] = useSearchParams();
+  const isSpectating = searchParams.get("spectate") === "1";
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
