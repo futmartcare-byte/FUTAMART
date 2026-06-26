@@ -111,6 +111,8 @@ export default function ChatList() {
   };
 
   const filtered = chats.filter((chat) => {
+    const isSupportChat = chat.seller_id === SUPPORT_USER_ID || chat.buyer_id === SUPPORT_USER_ID || chat.listing_title === "Customer Support";
+    if (isSupportChat) return false;
     if (!search) return true;
     const other = getOtherParty(chat);
     return other.name?.toLowerCase().includes(search.toLowerCase()) ||
