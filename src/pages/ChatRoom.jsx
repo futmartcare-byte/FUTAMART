@@ -18,6 +18,8 @@ import { sendChatNotification } from "@/lib/firebase";
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = "futmart_listings";
+const ADMIN_EMAIL = "futmartzite@gmail.com";
+const SUPPORT_USER_ID = "1629c76b-0af3-48b0-bf03-cf73710e6d57";
 
 async function uploadToCloudinary(file, folder = "futmart/chat") {
   const formData = new FormData();
@@ -145,6 +147,10 @@ export default function ChatRoom() {
     enabled: !!id,
   });
 
+  // Admin viewing a support chat acts AS the Support account, not as themselves
+  const isAdminSupportView = user?.email === ADMIN_EMAIL && chat?.seller_id === SUPPORT_USER_ID;
+  const effectiveUserId = isAdminSupportView ? SUPPORT_USER_ID : user?.id;
+
   const { data: messages = [], isLoading: msgsLoading } = useQuery({
     queryKey: ["messages", id],
     queryFn: async () => {
@@ -187,7 +193,7 @@ export default function ChatRoom() {
   // STAGE 1: as soon as an incoming message reaches this device, mark it "delivered".
   useEffect(() => {
     if (!messages.length || !user?.id) return;
-    const toDeliver = messages.filter(m => m.sender_id !== user.id && m.transmission_state === "sent");
+    const toDeliver = messages.filter(m => m.sender_id !== effectiveUserId && m.transmission_state === "sent");
     if (!toDeliver.length) return;
     supabase.from("messages").update({ transmission_state: "delivered" }).in("id", toDeliver.map(m => m.id));
   }, [messages.length, user?.id]);
@@ -196,11 +202,11 @@ export default function ChatRoom() {
   const markAsRead = useCallback(() => {
     if (!messages.length || !user?.id || !chat) return;
     if (document.hidden) return;
-    const unread = messages.filter(m => m.sender_id !== user.id && m.transmission_state !== "read");
+    const unread = messages.filter(m => m.sender_id !== effectiveUserId && m.transmission_state !== "read");
     if (!unread.length) return;
     (async () => {
       await supabase.from("messages").update({ transmission_state: "read" }).in("id", unread.map(m => m.id));
-      const isBuyer = chat.buyer_id === user.id;
+      const isBuyer = chat.buyer_id === effectiveUserId;
       await supabase
         .from("chats")
         .update(isBuyer ? { unread_count_buyer: 0 } : { unread_count_seller: 0 })
@@ -220,8 +226,8 @@ export default function ChatRoom() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [markAsRead]);
 
-  const otherName = chat?.seller_id === user?.id ? chat?.buyer_name : chat?.seller_name;
-  const otherId = chat?.seller_id === user?.id ? chat?.buyer_id : chat?.seller_id;
+  const otherName = chat?.seller_id === effectiveUserId ? chat?.buyer_name : chat?.seller_name;
+  const otherId = chat?.seller_id === effectiveUserId ? chat?.buyer_id : chat?.seller_id;
 
   const { data: otherProfile } = useQuery({
     queryKey: ["other-profile", otherId],
@@ -263,7 +269,7 @@ export default function ChatRoom() {
   const signalTyping = useCallback(() => {
     if (!chat?.id || !user?.id) return;
     const until = new Date(Date.now() + 4000).toISOString();
-    supabase.from("chats").update({ typing_user_id: user.id, typing_until: until }).eq("id", chat.id);
+    supabase.from("chats").update({ typing_user_id: effectiveUserId, typing_until: until }).eq("id", chat.id);
     clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
       supabase.from("chats").update({ typing_user_id: null, typing_until: null }).eq("id", chat.id);
@@ -281,8 +287,8 @@ export default function ChatRoom() {
         .from("messages")
         .insert({
           chat_id: id,
-          sender_id: user.id,
-          sender_name: chat?.seller_id === user.id ? chat.seller_name : chat.buyer_name,
+          sender_id: effectiveUserId,
+          sender_name: chat?.seller_id === effectiveUserId ? chat.seller_name : chat.buyer_name,
           transmission_state: "sent",
           ...msgData,
         })
@@ -290,12 +296,12 @@ export default function ChatRoom() {
         .single();
       if (error) throw error;
 
-      const isSeller = chat.seller_id === user.id;
+      const isSeller = chat.seller_id === effectiveUserId;
       const currentUnread = isSeller ? (chat.unread_count_buyer || 0) : (chat.unread_count_seller || 0);
       const { error: chatError } = await supabase
         .from("chats")
         .update({
-          last_message: msgData.payload_text || (msgData.attachment_type === "voice_note" ? "🎙️ Voice note" : "📎 Attachment"),
+          last_message: msgData.payload_text || (msgData.attachment_type === "voice_note" ? "🎙️ Voice note" : "📷 Photo"),
           last_message_time: new Date().toISOString(),
           ...(isSeller ? { unread_count_buyer: currentUnread + 1 } : { unread_count_seller: currentUnread + 1 }),
         })
@@ -335,18 +341,6 @@ export default function ChatRoom() {
       sendMessage.mutate({ attachment_url: url, attachment_type: "image" });
     } catch {
       toast.error("Image upload failed");
-    }
-  };
-
-  const handleDocUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("File must be under 5MB"); return; }
-    try {
-      const url = await uploadToCloudinary(file);
-      sendMessage.mutate({ attachment_url: url, attachment_type: "document" });
-    } catch {
-      toast.error("Document upload failed");
     }
   };
 
@@ -435,7 +429,7 @@ export default function ChatRoom() {
       return <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline">📄 View document</a>;
     }
     if (msg.attachment_type === "image" && msg.attachment_url) {
-      return <img src={msg.attachment_url} alt="" className="max-w-[200px] rounded-lg cursor-pointer" onClick={() => setLightboxImg(msg.attachment_url)} />;
+      return <img src={msg.attachment_url} alt="" className="max-w-[200px] rounded-lg cursor-pointer allow-interaction" onClick={() => setLightboxImg(msg.attachment_url)} />;
     }
     return <p className="text-sm whitespace-pre-wrap break-words">{msg.payload_text}</p>;
   };
@@ -451,7 +445,7 @@ export default function ChatRoom() {
       }
       // FIX: optional chaining — user can briefly be null on refresh while auth rehydrates,
       // and without this guard the whole app crashes to a blank screen.
-      const isMe = msg.sender_id === user?.id;
+      const isMe = msg.sender_id === effectiveUserId;
       const isRead = msg.transmission_state === "read";
       const isDelivered = msg.transmission_state === "delivered" || isRead;
 
@@ -596,10 +590,6 @@ export default function ChatRoom() {
         ) : (
           <div className="flex items-center gap-2">
             <label className="shrink-0 cursor-pointer p-1">
-              <Paperclip className="w-5 h-5 text-muted-foreground" />
-              <input type="file" className="hidden" onChange={handleDocUpload} accept=".pdf,.doc,.docx,.txt" />
-            </label>
-            <label className="shrink-0 cursor-pointer p-1">
               <ImageIcon className="w-5 h-5 text-muted-foreground" />
               <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
             </label>
@@ -638,7 +628,7 @@ export default function ChatRoom() {
 
       {lightboxImg && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setLightboxImg(null)}>
-          <img src={lightboxImg} alt="" className="max-w-full max-h-full rounded-xl object-contain" />
+          <img src={lightboxImg} alt="" className="max-w-full max-h-full rounded-xl object-contain allow-interaction" />
         </div>
       )}
     </div>
