@@ -50,39 +50,7 @@ function SupportTab() {
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState(false);
 
-  if (!unlocked) {
-    return (
-      <div className="p-6 flex flex-col items-center justify-center gap-4 pt-16">
-        <Headphones className="w-10 h-10 text-orange-400 opacity-70" />
-        <p className="text-sm font-semibold text-center">Support Inbox is protected</p>
-        <p className="text-xs text-muted-foreground text-center">Enter the support password to continue</p>
-        <input
-          type="password"
-          value={pwInput}
-          onChange={(e) => { setPwInput(e.target.value); setPwError(false); }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (pwInput === SUPPORT_PASSWORD) { setUnlocked(true); }
-              else { setPwError(true); setPwInput(""); }
-            }
-          }}
-          placeholder="Enter password"
-          className="w-full max-w-xs px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-center focus:outline-none focus:border-orange-400"
-          style={{ WebkitUserSelect: "text", userSelect: "text" }}
-        />
-        {pwError && <p className="text-xs text-red-400">Incorrect password</p>}
-        <button
-          onClick={() => {
-            if (pwInput === SUPPORT_PASSWORD) { setUnlocked(true); }
-            else { setPwError(true); setPwInput(""); }
-          }}
-          className="px-6 py-2 rounded-xl text-sm font-semibold text-white"
-          style={{ background: "linear-gradient(135deg,#FF6B00,#FFB000)" }}>
-          Unlock
-        </button>
-      </div>
-    );
-  }
+
   const { data: supportChats = [], isLoading } = useQuery({
     queryKey: ["support-chats"],
     queryFn: async () => {
@@ -98,6 +66,38 @@ function SupportTab() {
   });
 
   const totalUnread = supportChats.reduce((sum, c) => sum + (c.unread_count_seller || 0), 0);
+
+  if (!unlocked) return (
+    <div className="p-6 flex flex-col items-center justify-center gap-4 pt-16">
+      <Headphones className="w-10 h-10 text-orange-400 opacity-70" />
+      <p className="text-sm font-semibold text-center">Support Inbox is protected</p>
+      <p className="text-xs text-muted-foreground text-center">Enter the support password to continue</p>
+      <input
+        type="password"
+        value={pwInput}
+        onChange={(e) => { setPwInput(e.target.value); setPwError(false); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            if (pwInput === SUPPORT_PASSWORD) { setUnlocked(true); }
+            else { setPwError(true); setPwInput(""); }
+          }
+        }}
+        placeholder="Enter password"
+        className="w-full max-w-xs px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-center focus:outline-none focus:border-orange-400"
+        style={{ WebkitUserSelect: "text", userSelect: "text" }}
+      />
+      {pwError && <p className="text-xs text-red-400">Incorrect password</p>}
+      <button
+        onClick={() => {
+          if (pwInput === SUPPORT_PASSWORD) { setUnlocked(true); }
+          else { setPwError(true); setPwInput(""); }
+        }}
+        className="px-6 py-2 rounded-xl text-sm font-semibold text-white"
+        style={{ background: "linear-gradient(135deg,#FF6B00,#FFB000)" }}>
+        Unlock
+      </button>
+    </div>
+  );
 
   return (
     <div className="p-4 space-y-3 pb-24">
