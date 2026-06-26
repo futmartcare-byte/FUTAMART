@@ -270,8 +270,67 @@ function DashboardTab({ profiles, listings, notifications }) {
 }
 
 // ---- Users Tab ----
+function SpectateChatsModal({ profile, onClose }) {
+  const navigate = useNavigate();
+  const { data: chats = [], isLoading } = useQuery({
+    queryKey: ["admin-spectate-chats", profile.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("chats")
+        .select("*")
+        .or(`buyer_id.eq.${profile.id},seller_id.eq.${profile.id}`)
+        .order("last_message_time", { ascending: false, nullsFirst: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-lg bg-card rounded-t-2xl p-4 space-y-3 max-h-[70vh] overflow-y-auto pb-8"
+        onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-sm font-bold flex items-center gap-2">
+            <Eye className="w-4 h-4 text-orange-400" /> {profile.full_name || profile.username}'s Chats
+          </p>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <XCircle className="w-5 h-5" />
+          </button>
+        </div>
+        {isLoading ? (
+          Array(3).fill(0).map((_, i) => <div key={i} className="glass rounded-xl h-14 skeleton-glass" />)
+        ) : chats.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">No chats found</p>
+        ) : (
+          chats.map(chat => {
+            const other = chat.buyer_id === profile.id
+              ? { name: chat.seller_name, avatar: chat.seller_avatar }
+              : { name: chat.buyer_name, avatar: chat.buyer_avatar };
+            return (
+              <button key={chat.id} onClick={() => { navigate(`/chat/${chat.id}`); onClose(); }}
+                className="w-full flex items-center gap-3 p-3 glass rounded-xl hover:brightness-110 text-left">
+                <div className="w-9 h-9 rounded-full bg-orange-500/20 flex items-center justify-center shrink-0 overflow-hidden">
+                  {other.avatar
+                    ? <img src={other.avatar} alt="" className="w-full h-full object-cover allow-interaction" />
+                    : <span className="text-sm font-bold text-orange-400">{other.name?.[0]?.toUpperCase()}</span>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{other.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{chat.last_message || chat.listing_title}</p>
+                </div>
+                <Eye className="w-4 h-4 text-orange-400 shrink-0" />
+              </button>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
 function UsersTab({ profiles, onAction }) {
   const [search, setSearch] = useState("");
+  const [spectating, setSpectating] = useState(null);
   const filtered = profiles.filter(p =>
     p.full_name?.toLowerCase().includes(search.toLowerCase()) ||
     p.username?.toLowerCase().includes(search.toLowerCase()) ||
@@ -313,6 +372,10 @@ function UsersTab({ profiles, onAction }) {
                 className={`text-xs px-2 h-7 ${profile.is_banned ? "text-green-400" : "text-red-400"}`}
                 onClick={() => onAction({ type: "ban", profileId: profile.id, isBanned: profile.is_banned, name: profile.full_name })}>
                 <Ban className="w-3 h-3 mr-1" />{profile.is_banned ? "Unban" : "Ban"}
+              </GlassButton>
+              <GlassButton variant="ghost" size="sm" className="text-xs px-2 h-7 text-orange-400"
+                onClick={() => setSpectating(profile)}>
+                <Eye className="w-3 h-3 mr-1" />Chats
               </GlassButton>
             </div>
           </GlassCard>
