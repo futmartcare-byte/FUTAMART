@@ -280,6 +280,7 @@ function SpectateChatsModal({ profile, onClose }) {
         .select("*")
         .or(`buyer_id.eq.${profile.id},seller_id.eq.${profile.id}`)
         .order("last_message_time", { ascending: false, nullsFirst: false });
+      console.log("spectate chats:", data, error);
       if (error) throw error;
       return data;
     },
