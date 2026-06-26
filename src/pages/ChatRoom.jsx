@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
@@ -118,6 +118,8 @@ function SwipeMessage({ isMe, children, onReply }) {
 
 export default function ChatRoom() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const isSpectating = searchParams.get("spectate") === "1";
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -445,7 +447,7 @@ export default function ChatRoom() {
       }
       // FIX: optional chaining — user can briefly be null on refresh while auth rehydrates,
       // and without this guard the whole app crashes to a blank screen.
-      const isMe = msg.sender_id === effectiveUserId;
+      const isMe = isSpectating ? msg.sender_id === chat?.seller_id : msg.sender_id === effectiveUserId;
       const isRead = msg.transmission_state === "read";
       const isDelivered = msg.transmission_state === "delivered" || isRead;
 
