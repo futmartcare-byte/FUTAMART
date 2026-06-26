@@ -649,6 +649,8 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
               <button onClick={() => deleteNotif.mutate(n.id)} className="p-1 text-muted-foreground hover:text-red-400 shrink-0">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
+              </div>
+              {n.broadcast_id && <ReactionCount broadcastId={n.broadcast_id} />}
             </GlassCard>
           ))}
         </div>
