@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Heart, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
           {!imageLoaded && <div className="absolute inset-0 skeleton-glass" />}
           {isVisible && (
             <img
-              src={listing.images?.[0]}
+              src={listing.images?.[0]?.includes("cloudinary.com") ? listing.images[0].replace("/upload/", "/upload/w_400,h_400,c_fill,q_70,f_auto/") : listing.images?.[0]}
               alt={listing.title}
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
@@ -69,7 +69,7 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
             {listing.title}
           </p>
           <p className="text-sm font-bold text-orange-500 font-display mt-0.5">
-            ₦{listing.price?.toLocaleString()}
+            â‚¦{listing.price?.toLocaleString()}
           </p>
         </Link>
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
