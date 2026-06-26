@@ -25,7 +25,7 @@ messaging.onBackgroundMessage((payload) => {
 });
 
 const CACHE_NAME = 'futamart-v11';
-const urlsToCache = ['/'];
+const urlsToCache = ['/', '/offline.html'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)));
@@ -54,7 +54,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           return response;
         })
-        .catch(() => caches.match('/'))
+        .catch(() => caches.match('/offline.html'))
     );
     return;
   }
