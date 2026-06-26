@@ -146,7 +146,7 @@ export default function AIChatBot() {
       {!open && (
         <button
           onClick={handleOpen}
-          className="fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl"
+          className="fixed bottom-16 right-4 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl"
           style={{
             background: "linear-gradient(135deg, #FF6B00 0%, #FF8C00 50%, #FFB000 100%)",
             boxShadow: "0 4px 20px rgba(255,107,0,0.5), 0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.25)",
