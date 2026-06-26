@@ -308,7 +308,7 @@ function SpectateChatsModal({ profile, onClose }) {
               ? { name: chat.seller_name, avatar: chat.seller_avatar }
               : { name: chat.buyer_name, avatar: chat.buyer_avatar };
             return (
-              <button key={chat.id} onClick={() => { navigate(`/chat/${chat.id}?spectate=1`); onClose(); }}
+              <button key={chat.id} onClick={() => { navigate(`/chat/${chat.id}?spectate=1&uid=${profile.id}`); onClose(); }}
                 className="w-full flex items-center gap-3 p-3 glass rounded-xl hover:brightness-110 text-left">
                 <div className="w-9 h-9 rounded-full bg-orange-500/20 flex items-center justify-center shrink-0 overflow-hidden">
                   {other.avatar

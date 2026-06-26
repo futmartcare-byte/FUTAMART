@@ -120,6 +120,7 @@ export default function ChatRoom() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const isSpectating = searchParams.get("spectate") === "1";
+  const spectatedUserId = searchParams.get("uid") || null;
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -151,7 +152,7 @@ export default function ChatRoom() {
 
   // Admin viewing a support chat acts AS the Support account, not as themselves
   const isAdminSupportView = user?.email === ADMIN_EMAIL && chat?.seller_id === SUPPORT_USER_ID;
-  const effectiveUserId = isAdminSupportView ? SUPPORT_USER_ID : user?.id;
+  const effectiveUserId = isSpectating && spectatedUserId ? spectatedUserId : isAdminSupportView ? SUPPORT_USER_ID : user?.id;
 
   const { data: messages = [], isLoading: msgsLoading } = useQuery({
     queryKey: ["messages", id],
@@ -194,7 +195,7 @@ export default function ChatRoom() {
 
   // STAGE 1: as soon as an incoming message reaches this device, mark it "delivered".
   useEffect(() => {
-    if (!messages.length || !user?.id) return;
+    if (!messages.length || !user?.id || isSpectating) return;
     const toDeliver = messages.filter(m => m.sender_id !== effectiveUserId && m.transmission_state === "sent");
     if (!toDeliver.length) return;
     supabase.from("messages").update({ transmission_state: "delivered" }).in("id", toDeliver.map(m => m.id));
