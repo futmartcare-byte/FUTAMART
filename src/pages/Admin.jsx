@@ -46,9 +46,9 @@ const SUPPORT_PASSWORD = "futamart2025";
 
 function SupportTab() {
   const navigate = useNavigate();
-  const [unlocked, setUnlocked] = React.useState(false);
-  const [pwInput, setPwInput] = React.useState("");
-  const [pwError, setPwError] = React.useState(false);
+  const [unlocked, setUnlocked] = useState(false);
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState(false);
 
   if (!unlocked) {
     return (
