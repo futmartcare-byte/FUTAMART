@@ -42,6 +42,7 @@ export default function PullToRefresh({ children }) {
       if (navigator.vibrate) navigator.vibrate(15);
       try {
         await queryClient.invalidateQueries();
+        window.location.reload();
       } finally {
         setTimeout(() => {
           setIsRefreshing(false);
@@ -76,8 +77,11 @@ export default function PullToRefresh({ children }) {
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center"
           style={{
-            background: "linear-gradient(160deg, #FF6B00 0%, #FF8C00 50%, #FFB000 100%)",
-            boxShadow: "0 4px 16px rgba(255,107,0,0.5), 0 2px 6px rgba(0,0,0,0.25)",
+            background: "rgba(30,30,30,0.55)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
             transform: isRefreshing ? "none" : `rotate(${progress * 300}deg) scale(${0.6 + progress * 0.4})`,
             transition: pullingRef.current ? "none" : "transform 0.25s ease",
           }}
