@@ -383,9 +383,9 @@ function UsersTab({ profiles, onAction }) {
         ))}
       </div>
     </div>
-    {spectating && <SpectateChatsModal profile={spectating} onClose={() => setSpectating(null)} />}
   );
 }
+
 
 // ---- Listings Tab ----
 function ListingsTab({ listings, profiles, onRemoveListing, onFeatureListing }) {
