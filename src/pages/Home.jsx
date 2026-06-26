@@ -52,10 +52,11 @@ export default function Home() {
     }
     const { data, error } = await query;
     if (error) throw error;
+    const shuffled = [...data].sort(() => Math.random() - 0.5);
     if (replace) {
-      setListings(data);
+      setListings(shuffled);
     } else {
-      setListings((prev) => [...prev, ...data]);
+      setListings((prev) => [...prev, ...shuffled]);
     }
     setHasMore(data.length === PAGE_SIZE);
     return data;
@@ -311,3 +312,4 @@ export default function Home() {
     </div>
   );
 }
+
