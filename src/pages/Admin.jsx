@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
@@ -13,7 +13,7 @@ import {
   ArrowLeft, Search, Shield, Crown, UserCheck, Ban, Key, Bell,
   Send, Users, User, BarChart3, Package, Flag, Settings,
   Trash2, CheckCircle, XCircle, Star, RefreshCw, Image as ImageIcon,
-  TrendingUp, MessageSquare, AlertCircle, History, Eye
+  TrendingUp, MessageSquare, AlertCircle, History, Eye, Headphones
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -39,6 +39,91 @@ async function uploadToCloudinary(file, folder) {
   if (!res.ok) throw new Error("Upload failed");
   const data = await res.json();
   return data.secure_url;
+}
+
+// ---- Support Tab ----
+function SupportTab() {
+  const navigate = useNavigate();
+  const { data: supportChats = [], isLoading } = useQuery({
+    queryKey: ["support-chats"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("chats")
+        .select("*")
+        .eq("seller_id", "1629c76b-0af3-48b0-bf03-cf73710e6d57")
+        .eq("listing_title", "Customer Support")
+        .order("last_message_time", { ascending: false, nullsFirst: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const totalUnread = supportChats.reduce((sum, c) => sum + (c.unread_count_seller || 0), 0);
+
+  return (
+    <div className="p-4 space-y-3 pb-24">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
+          <Headphones className="w-4 h-4 text-orange-400" /> Support Inbox
+        </h3>
+        {totalUnread > 0 && (
+          <span className="px-2 py-0.5 rounded-full bg-orange-500 text-white text-[11px] font-bold">
+            {totalUnread} unread
+          </span>
+        )}
+      </div>
+      {isLoading ? (
+        Array(3).fill(0).map((_, i) => <div key={i} className="glass rounded-2xl h-[72px] skeleton-glass" />)
+      ) : supportChats.length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <Headphones className="w-12 h-12 mx-auto mb-3 opacity-30" />
+          <p className="font-medium">No support chats yet</p>
+          <p className="text-sm mt-1">Users who tap Support will appear here</p>
+        </div>
+      ) : (
+        supportChats.map((chat) => {
+          const unread = chat.unread_count_seller || 0;
+          const hasUnread = unread > 0;
+          return (
+            <GlassCard
+              key={chat.id}
+              className="flex items-center gap-3 p-3 rounded-2xl hover:brightness-110 transition-all cursor-pointer"
+              style={{ background: hasUnread ? "linear-gradient(135deg, rgba(255,107,0,0.18), rgba(255,140,0,0.08))" : "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(251,191,36,0.05))" }}
+              onClick={() => navigate(`/chat/${chat.id}`)}
+            >
+              <div className="w-12 h-12 rounded-full ring-1 ring-white/10 bg-gradient-to-br from-orange-500/20 to-orange-500/5 flex items-center justify-center overflow-hidden shrink-0">
+                {chat.buyer_avatar ? (
+                  <img src={chat.buyer_avatar} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-base font-bold text-orange-400">{chat.buyer_name?.[0]?.toUpperCase()}</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className={`text-[15px] truncate ${hasUnread ? "font-semibold text-foreground" : "font-medium text-foreground/90"}`}>
+                    {chat.buyer_name || "User"}
+                  </p>
+                  <span className={`text-[11px] shrink-0 ${hasUnread ? "text-orange-400 font-semibold" : "text-muted-foreground/60"}`}>
+                    {chat.last_message_time ? format(new Date(chat.last_message_time), isToday(new Date(chat.last_message_time)) ? "h:mm a" : "MMM d") : ""}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2 mt-0.5">
+                  <p className={`text-[13px] truncate ${hasUnread ? "text-foreground/80 font-medium" : "text-muted-foreground"}`}>
+                    {chat.last_message || "No messages yet"}
+                  </p>
+                  {hasUnread && (
+                    <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-[11px] font-bold text-white flex items-center justify-center">
+                      {unread > 99 ? "99+" : unread}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </GlassCard>
+          );
+        })
+      )}
+    </div>
+  );
 }
 
 // ---- Dashboard Stats ----
@@ -168,7 +253,7 @@ function ListingsTab({ listings, profiles, onRemoveListing, onFeatureListing }) 
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{listing.title}</p>
-                <p className="text-xs text-orange-400">₦{listing.price?.toLocaleString()}</p>
+                <p className="text-xs text-orange-400">â‚¦{listing.price?.toLocaleString()}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                     listing.status === "active" ? "bg-green-400/10 text-green-400" :
@@ -347,7 +432,7 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
                 <p className="text-sm font-medium truncate">{n.title}</p>
                 <p className="text-xs text-muted-foreground truncate">{n.message}</p>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">
-                  {n.created_at ? format(new Date(n.created_at), "MMM d, h:mm a") : ""} · {n.is_read ? "Read" : "Unread"}
+                  {n.created_at ? format(new Date(n.created_at), "MMM d, h:mm a") : ""} Â· {n.is_read ? "Read" : "Unread"}
                 </p>
               </div>
               <button onClick={() => deleteNotif.mutate(n.id)} className="p-1 text-muted-foreground hover:text-red-400 shrink-0">
@@ -491,11 +576,12 @@ export default function Admin() {
 
       <Tabs defaultValue="dashboard" className="w-full">
         <div className="overflow-x-auto no-scrollbar">
-          <TabsList className="glass w-max min-w-full grid grid-cols-5 h-10 mx-0 rounded-none border-b border-white/5">
+          <TabsList className="glass w-max min-w-full grid grid-cols-6 h-10 mx-0 rounded-none border-b border-white/5">
             <TabsTrigger value="dashboard" className="text-[10px] flex items-center gap-1"><BarChart3 className="w-3 h-3" />Stats</TabsTrigger>
             <TabsTrigger value="users" className="text-[10px] flex items-center gap-1"><Users className="w-3 h-3" />Users</TabsTrigger>
             <TabsTrigger value="listings" className="text-[10px] flex items-center gap-1"><Package className="w-3 h-3" />Listings</TabsTrigger>
             <TabsTrigger value="notify" className="text-[10px] flex items-center gap-1"><Bell className="w-3 h-3" />Notify</TabsTrigger>
+            <TabsTrigger value="support" className="text-[10px] flex items-center gap-1"><Headphones className="w-3 h-3" />Support</TabsTrigger>
             <TabsTrigger value="settings" className="text-[10px] flex items-center gap-1"><Settings className="w-3 h-3" />Settings</TabsTrigger>
           </TabsList>
         </div>
@@ -523,6 +609,10 @@ export default function Admin() {
             sentNotifications={sentNotifications}
             onRefresh={() => queryClient.invalidateQueries({ queryKey: ["admin-notifications"] })}
           />
+        </TabsContent>
+
+        <TabsContent value="support">
+          <SupportTab />
         </TabsContent>
 
         <TabsContent value="settings">
@@ -582,4 +672,9 @@ export default function Admin() {
     </div>
   );
 }
+
+
+
+
+
 
