@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate } from "react-router-dom";
 import GlassCard from "@/components/GlassCard";
-import { Bell, ArrowLeft, CheckCheck, Trash2, Shield, ShoppingBag, Zap, AlertTriangle, Settings } from "lucide-react";
+import { Bell, ArrowLeft, CheckCheck, Trash2, Shield, ShoppingBag, Zap, AlertTriangle, Settings, ThumbsUp, ThumbsDown } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 
 const TYPE_META = {

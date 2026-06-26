@@ -146,7 +146,7 @@ export default function AIChatBot() {
       {!open && (
         <button
           onClick={handleOpen}
-          className="fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl"
+          className="fixed bottom-20 right-4 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl"
           style={{
             background: "linear-gradient(135deg, #FF6B00 0%, #FF8C00 50%, #FFB000 100%)",
             boxShadow: "0 4px 20px rgba(255,107,0,0.5), 0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.25)",
@@ -157,7 +157,7 @@ export default function AIChatBot() {
       )}
 
       {open && (
-        <div className="fixed bottom-28 right-3 z-50 w-[340px] max-w-[calc(100vw-24px)] h-[520px] bg-card border border-white/10 rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+        <div className="fixed bottom-24 right-3 z-50 w-[340px] max-w-[calc(100vw-24px)] h-[520px] bg-card border border-white/10 rounded-2xl flex flex-col shadow-2xl overflow-hidden">
           <div
             className="flex items-center justify-between px-4 py-3 shrink-0"
             style={{ background: "linear-gradient(135deg, #FF6B00, #FF8C00, #FFB000)" }}
