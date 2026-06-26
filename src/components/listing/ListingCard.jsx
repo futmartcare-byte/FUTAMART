@@ -81,3 +81,4 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
   );
 }
 
+
