@@ -41,6 +41,75 @@ async function uploadToCloudinary(file, folder) {
   return data.secure_url;
 }
 
+// ---- Reports Tab ----
+function ReportsTab() {
+  const navigate = useNavigate();
+  const { data: reports = [], isLoading } = useQuery({
+    queryKey: ["admin-reports"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("reports").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const deleteReport = useMutation({
+    mutationFn: async (id) => {
+      const { error } = await supabase.from("reports").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-reports"] }),
+  });
+
+  return (
+    <div className="p-4 space-y-3 pb-24">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
+          <Flag className="w-4 h-4 text-red-400" /> Reports
+        </h3>
+        {reports.length > 0 && (
+          <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[11px] font-bold">{reports.length}</span>
+        )}
+      </div>
+      {isLoading ? (
+        Array(3).fill(0).map((_, i) => <div key={i} className="glass rounded-2xl h-[72px] skeleton-glass" />)
+      ) : reports.length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <Flag className="w-12 h-12 mx-auto mb-3 opacity-30" />
+          <p className="font-medium">No reports yet</p>
+          <p className="text-sm mt-1">Reported listings and sellers will appear here</p>
+        </div>
+      ) : (
+        reports.map(r => (
+          <GlassCard key={r.id} className="p-3 flex items-start gap-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${r.target_type === "listing" ? "bg-orange-500/20" : "bg-red-500/20"}`}>
+              <Flag className={`w-4 h-4 ${r.target_type === "listing" ? "text-orange-400" : "text-red-400"}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{r.target_name}</p>
+              <p className="text-xs text-muted-foreground">{r.target_type === "listing" ? "Listing" : "Seller"} · {r.reason}</p>
+              {r.details && <p className="text-xs text-muted-foreground/60 mt-0.5 truncate">{r.details}</p>}
+              <div className="flex items-center gap-2 mt-1.5">
+                {r.target_type === "listing" && (
+                  <button onClick={() => navigate(`/listing/${r.target_id}`)}
+                    className="text-[11px] text-orange-400 font-medium">View Listing</button>
+                )}
+                {r.target_type === "seller" && (
+                  <button onClick={() => navigate(`/seller/${r.target_id}`)}
+                    className="text-[11px] text-orange-400 font-medium">View Seller</button>
+                )}
+              </div>
+            </div>
+            <button onClick={() => deleteReport.mutate(r.id)} className="p-1 text-muted-foreground hover:text-red-400 shrink-0">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </GlassCard>
+        ))
+      )}
+    </div>
+  );
+}
+
 // ---- Support Tab ----
 const SUPPORT_PASSWORD = "futamart2025";
 
@@ -621,7 +690,7 @@ export default function Admin() {
             <TabsTrigger value="listings" className="text-[10px] flex items-center gap-1"><Package className="w-3 h-3" />Listings</TabsTrigger>
             <TabsTrigger value="notify" className="text-[10px] flex items-center gap-1"><Bell className="w-3 h-3" />Notify</TabsTrigger>
             <TabsTrigger value="support" className="text-[10px] flex items-center gap-1"><Headphones className="w-3 h-3" />Support</TabsTrigger>
-            <TabsTrigger value="settings" className="text-[10px] flex items-center gap-1"><Settings className="w-3 h-3" />Settings</TabsTrigger>
+            <TabsTrigger value="settings" className="text-[10px] flex items-center gap-1"><Flag className="w-3 h-3" />Reports</TabsTrigger>
           </TabsList>
         </div>
 
@@ -655,33 +724,7 @@ export default function Admin() {
         </TabsContent>
 
         <TabsContent value="settings">
-          <div className="p-4 space-y-4 pb-24">
-            <GlassCard className="p-4 space-y-3">
-              <h3 className="text-sm font-semibold flex items-center gap-2"><Settings className="w-4 h-4 text-orange-400" /> App Settings</h3>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <div className="glass rounded-xl p-3 flex items-center justify-between">
-                  <span>Support Email</span>
-                  <span className="text-orange-400 text-xs">futmartcares@gmail.com</span>
-                </div>
-                <div className="glass rounded-xl p-3 flex items-center justify-between">
-                  <span>Admin Account</span>
-                  <span className="text-xs text-muted-foreground/60">{ADMIN_EMAIL}</span>
-                </div>
-                <div className="glass rounded-xl p-3 flex items-center justify-between">
-                  <span>Total Profiles</span>
-                  <span className="text-orange-400 font-bold">{profiles.length}</span>
-                </div>
-                <div className="glass rounded-xl p-3 flex items-center justify-between">
-                  <span>PRO Sellers</span>
-                  <span className="text-yellow-400 font-bold">{profiles.filter(p => p.is_pro_seller).length}</span>
-                </div>
-                <div className="glass rounded-xl p-3 flex items-center justify-between">
-                  <span>Banned Users</span>
-                  <span className="text-red-400 font-bold">{profiles.filter(p => p.is_banned).length}</span>
-                </div>
-              </div>
-            </GlassCard>
-          </div>
+          <ReportsTab />
         </TabsContent>
       </Tabs>
 
