@@ -60,16 +60,15 @@ export default function ChatList() {
     mutationFn: async () => {
       if (user.id === SUPPORT_USER_ID) return null;
 
-      // Check if support chat already exists
+      // Always check first
       const { data: existing } = await supabase
         .from("chats")
         .select("id")
         .eq("buyer_id", user.id)
         .eq("seller_id", SUPPORT_USER_ID)
         .maybeSingle();
-      if (existing) return existing;
+      if (existing) { navigate(`/chat/${existing.id}`); return null; }
 
-      // Fetch current user profile
       const { data: myProfile } = await supabase
         .from("profiles")
         .select("full_name, avatar_url")
