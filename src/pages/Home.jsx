@@ -1,13 +1,15 @@
-import { useState } from "react";
+﻿import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
 import { useProfile } from "@/lib/useProfile";
 import { Navigate, Link, useNavigate } from "react-router-dom";
-import { Shield, Bell } from "lucide-react";
+import { Shield, Bell, Loader2 } from "lucide-react";
 import ListingCard from "@/components/listing/ListingCard";
 import ListingSkeleton from "@/components/ListingSkeleton";
 import AIChatBot from "@/components/AIChatBot";
+
+const PAGE_SIZE = 20;
 
 const CATEGORIES = [
   { value: "all", label: "All" },
@@ -28,25 +30,63 @@ export default function Home() {
   const navigate = useNavigate();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const [activeCategory, setActiveCategory] = useState("all");
+  const [listings, setListings] = useState([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const loaderRef = useRef(null);
   const queryClient = useQueryClient();
 
-  const { data: listings = [], isLoading } = useQuery({
-    queryKey: ["listings", activeCategory],
-    queryFn: async () => {
-      let query = supabase
-        .from("listings")
-        .select("*")
-        .eq("status", "active")
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (activeCategory !== "all") {
-        query = query.eq("category", activeCategory);
-      }
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
-  });
+  const fetchListings = useCallback(async (pageNum, category, replace = false) => {
+    const from = pageNum * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    let query = supabase
+      .from("listings")
+      .select("*")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    if (category !== "all") {
+      query = query.eq("category", category);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    if (replace) {
+      setListings(data);
+    } else {
+      setListings((prev) => [...prev, ...data]);
+    }
+    setHasMore(data.length === PAGE_SIZE);
+    return data;
+  }, []);
+
+  // Initial load + category change
+  useEffect(() => {
+    setIsInitialLoading(true);
+    setPage(0);
+    setHasMore(true);
+    fetchListings(0, activeCategory, true).finally(() => setIsInitialLoading(false));
+  }, [activeCategory, fetchListings]);
+
+  // Intersection observer for infinite scroll
+  useEffect(() => {
+    const el = loaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingMore && !isInitialLoading) {
+          setIsFetchingMore(true);
+          const nextPage = page + 1;
+          setPage(nextPage);
+          fetchListings(nextPage, activeCategory).finally(() => setIsFetchingMore(false));
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, isFetchingMore, isInitialLoading, page, activeCategory, fetchListings]);
 
   const { data: savedListings = [] } = useQuery({
     queryKey: ["saved-listings", user?.id],
@@ -237,7 +277,7 @@ export default function Home() {
       {/* Listings Grid */}
       <div className="px-4 pb-4">
         <div className="grid grid-cols-2 gap-3">
-          {isLoading
+          {isInitialLoading
             ? Array(6).fill(0).map((_, i) => <ListingSkeleton key={i} />)
             : listings.map((listing) => (
                 <ListingCard
@@ -248,12 +288,23 @@ export default function Home() {
                 />
               ))}
         </div>
-        {!isLoading && listings.length === 0 && (
+
+        {!isInitialLoading && listings.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <p className="text-lg font-medium">No listings yet</p>
             <p className="text-sm mt-1">Be the first to post!</p>
           </div>
         )}
+
+        {/* Infinite scroll trigger */}
+        <div ref={loaderRef} className="flex items-center justify-center py-6">
+          {isFetchingMore && (
+            <Loader2 className="w-5 h-5 text-orange-400 animate-spin" />
+          )}
+          {!hasMore && listings.length > 0 && (
+            <p className="text-xs text-muted-foreground/50">You've seen all listings</p>
+          )}
+        </div>
       </div>
 
       <AIChatBot />
