@@ -21,14 +21,14 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
   return (
     <div
       ref={ref}
-      className="rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+      className="rounded-xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
     >
       <Link to={`/listing/${listing.id}`} className="block">
         <div className="aspect-square relative overflow-hidden bg-muted">
           {!imageLoaded && <div className="absolute inset-0 skeleton-glass" />}
           {isVisible && (
             <img
-              src={listing.images?.[0]?.includes("cloudinary.com") ? listing.images[0].replace("/upload/", "/upload/w_400,c_limit,q_70,f_auto/") : listing.images?.[0]}
+              src={listing.images?.[0]?.includes("cloudinary.com") ? listing.images[0].replace("/upload/", "/upload/w_400,c_limit,q_80,f_auto/") : listing.images?.[0]}
               alt={listing.title}
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
@@ -48,13 +48,10 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
               <ProCrown size="xs" />
             </div>
           )}
-          {/* Save button overlay */}
           <button
             onClick={(e) => { e.preventDefault(); onToggleSave?.(listing.id); }}
             className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-sm"
-            style={{
-              background: isSaved ? "rgba(16,185,129,0.9)" : "rgba(255,255,255,0.9)",
-            }}
+            style={{ background: isSaved ? "rgba(16,185,129,0.9)" : "rgba(255,255,255,0.9)" }}
           >
             {isSaved
               ? <Check className="w-3.5 h-3.5 text-white" />
@@ -63,23 +60,20 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
           </button>
         </div>
       </Link>
-      <div className="p-2.5 space-y-1">
-        <Link to={`/listing/${listing.id}`}>
-          <p className="text-[12px] font-medium text-foreground leading-tight line-clamp-2">
+      <Link to={`/listing/${listing.id}`}>
+        <div className="px-2 py-1.5 space-y-0.5">
+          <p className="text-[11px] font-medium text-foreground leading-tight line-clamp-1">
             {listing.title}
           </p>
-          <p className="text-sm font-bold text-orange-500 font-display mt-0.5">
+          <p className="text-[12px] font-bold text-orange-500 font-display">
             ₦{listing.price?.toLocaleString()}
           </p>
-        </Link>
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-          <MapPin className="w-2.5 h-2.5 shrink-0" />
-          <span className="truncate">{listing.location_text}</span>
+          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <MapPin className="w-2.5 h-2.5 shrink-0" />
+            <span className="truncate">{listing.location_text}</span>
+          </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
-
-
-
