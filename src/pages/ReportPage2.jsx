@@ -38,6 +38,25 @@ export default function ReportPage2() {
         details,
       });
       if (error) throw error;
+
+      // Notify the reported user
+      const notifUserId = type === "listing"
+        ? (await supabase.from("listings").select("seller_id").eq("id", id).maybeSingle()).data?.seller_id
+        : id;
+
+      if (notifUserId && notifUserId !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: notifUserId,
+          title: type === "listing" ? "Your listing has been reported" : "Your profile has been reported",
+          message: type === "listing"
+            ? `Your listing "${decodeURIComponent(name || "")}" was reported for: ${reason}. Please review our community guidelines.`
+            : `Your seller profile was reported for: ${reason}. Please review our community guidelines.`,
+          type: "admin",
+          category: "admin",
+          from_name: "FutaMart Team",
+          is_read: false,
+        });
+      }
     },
     onSuccess: () => setDone(true),
     onError: () => toast.error("Failed to submit report"),
