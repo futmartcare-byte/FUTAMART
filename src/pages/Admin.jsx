@@ -288,7 +288,7 @@ function SpectateChatsModal({ profile, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-lg bg-card rounded-t-2xl p-4 space-y-3 max-h-[70vh] overflow-y-auto pb-8"
+      <div className="w-full max-w-lg bg-card rounded-t-2xl p-4 space-y-3 max-h-[80vh] overflow-y-auto pb-24"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-1">
           <p className="text-sm font-bold flex items-center gap-2">
