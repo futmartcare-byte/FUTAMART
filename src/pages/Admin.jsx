@@ -13,7 +13,7 @@ import {
   ArrowLeft, Search, Shield, Crown, UserCheck, Ban, Key, Bell,
   Send, Users, User, BarChart3, Package, Flag, Settings,
   Trash2, CheckCircle, XCircle, Star, RefreshCw, Image as ImageIcon,
-  TrendingUp, MessageSquare, AlertCircle, History, Eye, Headphones
+  TrendingUp, MessageSquare, AlertCircle, History, Eye, Headphones, ThumbsUp, ThumbsDown
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -454,6 +454,40 @@ function ListingsTab({ listings, profiles, onRemoveListing, onFeatureListing }) 
   );
 }
 
+// ---- Reaction Count Component ----
+function ReactionCount({ broadcastId }) {
+  const { data } = useQuery({
+    queryKey: ["reaction-count", broadcastId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("reaction")
+        .eq("broadcast_id", broadcastId)
+        .not("reaction", "is", null);
+      if (error) throw error;
+      const likes = data.filter(r => r.reaction === "like").length;
+      const dislikes = data.filter(r => r.reaction === "dislike").length;
+      const total = data.length + (await supabase.from("notifications").select("id", { count: "exact", head: true }).eq("broadcast_id", broadcastId)).count;
+      return { likes, dislikes };
+    },
+    refetchInterval: 30000,
+  });
+
+  if (!data) return null;
+
+  return (
+    <div className="flex items-center gap-3 pt-1 border-t border-white/5">
+      <span className="text-[10px] text-muted-foreground">Reactions:</span>
+      <span className="flex items-center gap-1 text-xs text-green-400 font-medium">
+        <ThumbsUp className="w-3 h-3" fill="currentColor" /> {data.likes}
+      </span>
+      <span className="flex items-center gap-1 text-xs text-red-400 font-medium">
+        <ThumbsDown className="w-3 h-3" fill="currentColor" /> {data.dislikes}
+      </span>
+    </div>
+  );
+}
+
 // ---- Notifications Tab ----
 function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
   const queryClient = useQueryClient();
@@ -485,7 +519,9 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
       if (imageFile) {
         image_url = await uploadToCloudinary(imageFile, "futmart/notifications");
       }
+      const broadcastId = crypto.randomUUID();
       const payload = {
+        broadcast_id: broadcastId,
         title: broadcastTitle.trim(),
         message: broadcastMsg.trim(),
         type: "admin",
@@ -600,7 +636,8 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
             <p className="text-xs text-muted-foreground text-center py-6">No notifications sent yet</p>
           )}
           {sentNotifications.slice(0, 20).map(n => (
-            <GlassCard key={n.id} className="p-3 flex items-start gap-3">
+            <GlassCard key={n.id} className="p-3 space-y-2">
+              <div className="flex items-start gap-3">
               {n.image_url && <img src={n.image_url} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{n.title}</p>
