@@ -28,7 +28,7 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
           {!imageLoaded && <div className="absolute inset-0 skeleton-glass" />}
           {isVisible && (
             <img
-              src={listing.images?.[0]?.includes("cloudinary.com") ? listing.images[0].replace("/upload/", "/upload/w_400,q_70,f_auto/") : listing.images?.[0]}
+              src={listing.images?.[0]}
               alt={listing.title}
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
