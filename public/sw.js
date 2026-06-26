@@ -24,7 +24,7 @@ messaging.onBackgroundMessage((payload) => {
   });
 });
 
-const CACHE_NAME = 'futamart-v12';
+const CACHE_NAME = 'futamart-v14';
 const urlsToCache = ['/', '/offline.html'];
 
 self.addEventListener('install', (event) => {
