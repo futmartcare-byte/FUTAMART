@@ -79,7 +79,7 @@ export default function ChatList() {
       const { data: chat, error } = await supabase
         .from("chats")
         .insert({
-          listing_id: null,
+          listing_id: "00000000-0000-0000-0000-000000000000",
           listing_title: "Customer Support",
           listing_image: SUPPORT_AVATAR,
           listing_price: null,
