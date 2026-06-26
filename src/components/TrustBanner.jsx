@@ -1,15 +1,14 @@
-import { ShieldAlert } from "lucide-react";
-import GlassCard from "./GlassCard";
+﻿import { ShieldAlert } from "lucide-react";
 
 export default function TrustBanner() {
   return (
-    <GlassCard className="mx-4 my-2 p-3 flex items-start gap-2 border-amber-500/30 bg-[#563e3e] text-[#3b2b2b]">
-      <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0" />
-      <p className="text-xs leading-relaxed text-[#ff0000]">FUTAMART SAFETY TIP
-For your safety, inspect and verify the item before payment. Always meet in a public location.
-
-      </p>
-    </GlassCard>);
-
+    <div className="mx-4 my-2 rounded-xl overflow-hidden flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20">
+      <ShieldAlert className="w-3.5 h-3.5 text-red-400 shrink-0" />
+      <div className="overflow-hidden flex-1 whitespace-nowrap">
+        <p className="inline-block text-[11px] font-bold text-red-400 animate-marquee">
+          FUTAMART SAFETY TIP — For your safety, inspect and verify the item before payment. Always meet in a public location.
+        </p>
+      </div>
+    </div>
+  );
 }
-

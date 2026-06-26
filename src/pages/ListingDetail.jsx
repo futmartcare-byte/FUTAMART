@@ -148,7 +148,7 @@ export default function ListingDetail() {
             <img
               src={images[currentImage]}
               alt={listing.title}
-              className="w-full h-full object-cover cursor-zoom-in"
+              className="w-full h-full object-cover cursor-zoom-in allow-interaction"
               onClick={() => setLightbox(true)}
             />
             {images.length > 1 && (
@@ -233,7 +233,7 @@ export default function ListingDetail() {
           onClick={() => setLightbox(false)}
         >
           <button className="absolute top-4 right-4 text-white/60 text-sm">tap to close</button>
-          <img src={images[currentImage]} alt="" className="max-w-full max-h-[90vh] object-contain" />
+          <img src={images[currentImage]} alt="" className="max-w-full max-h-[90vh] object-contain allow-interaction" />
         </div>
       )}
 
