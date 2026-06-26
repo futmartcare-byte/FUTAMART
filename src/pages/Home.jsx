@@ -277,7 +277,7 @@ export default function Home() {
 
       {/* Listings Grid */}
       <div className="px-4 pb-4">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           {isInitialLoading
             ? Array(6).fill(0).map((_, i) => <ListingSkeleton key={i} />)
             : listings.map((listing) => (
