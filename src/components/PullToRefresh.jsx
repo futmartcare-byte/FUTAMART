@@ -2,29 +2,32 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 
-const PULL_THRESHOLD = 70;
-const MAX_PULL = 100;
+const PULL_THRESHOLD = 64;
+const MAX_PULL = 90;
 
 export default function PullToRefresh({ children }) {
   const queryClient = useQueryClient();
-  const containerRef = useRef(null);
   const startYRef = useRef(null);
   const pullingRef = useRef(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const onTouchStart = useCallback((e) => {
-    const scrollEl = containerRef.current;
-    if (!scrollEl || scrollEl.scrollTop > 0 || isRefreshing) return;
+    if (window.scrollY > 0 || isRefreshing) return;
     startYRef.current = e.touches[0].clientY;
     pullingRef.current = true;
   }, [isRefreshing]);
 
   const onTouchMove = useCallback((e) => {
     if (!pullingRef.current || startYRef.current === null) return;
+    if (window.scrollY > 0) {
+      pullingRef.current = false;
+      setPullDistance(0);
+      return;
+    }
     const delta = e.touches[0].clientY - startYRef.current;
     if (delta <= 0) { setPullDistance(0); return; }
-    const eased = Math.min(MAX_PULL, delta * 0.4);
+    const eased = Math.min(MAX_PULL, delta * 0.45);
     setPullDistance(eased);
   }, []);
 
@@ -35,15 +38,15 @@ export default function PullToRefresh({ children }) {
 
     if (pullDistance >= PULL_THRESHOLD) {
       setIsRefreshing(true);
-      setPullDistance(PULL_THRESHOLD * 0.6);
-      if (navigator.vibrate) navigator.vibrate(20);
+      setPullDistance(PULL_THRESHOLD * 0.55);
+      if (navigator.vibrate) navigator.vibrate(15);
       try {
         await queryClient.invalidateQueries();
       } finally {
         setTimeout(() => {
           setIsRefreshing(false);
           setPullDistance(0);
-        }, 500);
+        }, 600);
       }
     } else {
       setPullDistance(0);
@@ -51,43 +54,38 @@ export default function PullToRefresh({ children }) {
   }, [pullDistance, queryClient]);
 
   const progress = Math.min(1, pullDistance / PULL_THRESHOLD);
-  const spinnerOffset = isRefreshing ? PULL_THRESHOLD * 0.6 : pullDistance;
-  const contentShift = isRefreshing ? PULL_THRESHOLD * 0.35 : pullDistance * 0.35;
+  const circleY = isRefreshing ? PULL_THRESHOLD * 0.55 : pullDistance;
 
   return (
     <div
-      ref={containerRef}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      style={{ overscrollBehaviorY: "contain", position: "relative" }}
+      style={{ position: "relative" }}
     >
       <div
-        className="absolute left-0 right-0 flex items-center justify-center pointer-events-none transition-transform duration-200"
+        className="fixed left-0 right-0 flex items-center justify-center pointer-events-none"
         style={{
-          top: 8,
-          transform: `translateY(${spinnerOffset - 36}px)`,
+          top: 0,
+          transform: `translateY(${circleY + 14}px)`,
           opacity: isRefreshing ? 1 : progress,
-          zIndex: 30,
+          transition: pullingRef.current ? "none" : "transform 0.25s ease, opacity 0.25s ease",
+          zIndex: 60,
         }}
       >
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg"
+          className="w-9 h-9 rounded-full flex items-center justify-center"
           style={{
             background: "linear-gradient(160deg, #FF6B00 0%, #FF8C00 50%, #FFB000 100%)",
-            boxShadow: "0 4px 14px rgba(255,107,0,0.45)",
-            transform: isRefreshing ? "none" : `rotate(${progress * 360}deg) scale(${0.7 + progress * 0.3})`,
+            boxShadow: "0 4px 16px rgba(255,107,0,0.5), 0 2px 6px rgba(0,0,0,0.25)",
+            transform: isRefreshing ? "none" : `rotate(${progress * 300}deg) scale(${0.6 + progress * 0.4})`,
+            transition: pullingRef.current ? "none" : "transform 0.25s ease",
           }}
         >
           <RefreshCw className={`w-4 h-4 text-white ${isRefreshing ? "animate-spin" : ""}`} strokeWidth={2.5} />
         </div>
       </div>
-      <div
-        className="transition-transform duration-200"
-        style={{ transform: `translateY(${contentShift}px)` }}
-      >
-        {children}
-      </div>
+      {children}
     </div>
   );
 }

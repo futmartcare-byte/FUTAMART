@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router-dom";
+﻿import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import PWAInstallBanner from "./PWAInstallBanner";
 import PullToRefresh from "./PullToRefresh";
@@ -13,15 +13,18 @@ function PresenceWrapper() {
 export default function AppLayout() {
   const location = useLocation();
   const hideNav = location.pathname.startsWith("/listing/");
+  const isHome = location.pathname === "/";
+
+  const content = (
+    <main className={hideNav ? "" : "pb-20"}>
+      <Outlet />
+    </main>
+  );
 
   return (
     <div className="min-h-screen max-w-lg mx-auto" style={{ background: "transparent" }}>
       <PresenceWrapper />
-      <PullToRefresh>
-        <main className={hideNav ? "" : "pb-20"}>
-          <Outlet />
-        </main>
-      </PullToRefresh>
+      {isHome ? <PullToRefresh>{content}</PullToRefresh> : content}
       {!hideNav && <BottomNav />}
       <PWAInstallBanner />
       <GlobalNotificationSystem />
