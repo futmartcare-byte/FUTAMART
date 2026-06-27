@@ -348,8 +348,7 @@ export default function ChatRoom() {
   };
 
   const previewAudio = () => {
-    if (!recordedBlob || sendingVoice) return;
-    setSendingVoice(true);
+    if (!recordedBlob) return;
     if (isPlaying) { audioPlayerRef.current?.pause(); setIsPlaying(false); return; }
     const audio = new Audio(URL.createObjectURL(recordedBlob));
     audioPlayerRef.current = audio;
