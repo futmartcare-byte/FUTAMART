@@ -27,6 +27,34 @@ import { uploadToCloudinary } from "@/lib/uploadImage";
 
 
 
+// ---- Waitlist Tab ----
+function WaitlistTab() {
+  const [waitlist, setWaitlist] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    supabase.from("pro_waitlist").select("*").order("created_at", { ascending: false }).then(({ data }) => {
+      setWaitlist(data || []);
+      setLoading(false);
+    });
+  }, []);
+  return (
+    <div className="space-y-3 p-4">
+      <h2 className="text-sm font-bold text-foreground">Pro Waitlist ({waitlist.length})</h2>
+      {loading ? <div className="text-xs text-muted-foreground">Loading...</div> : waitlist.length === 0 ? (
+        <div className="text-xs text-muted-foreground">No waitlist entries yet.</div>
+      ) : waitlist.map((entry, i) => (
+        <div key={entry.id} className="glass rounded-2xl p-3 flex items-center gap-3">
+          <span className="text-xs text-muted-foreground w-5">{i + 1}.</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">{entry.email}</p>
+            <p className="text-[10px] text-muted-foreground">{new Date(entry.created_at).toLocaleDateString()}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ---- Reports Tab ----
 function ReportsTab() {
   const navigate = useNavigate();
@@ -781,6 +809,7 @@ export default function Admin() {
             <TabsTrigger value="listings" className="text-[10px] flex items-center gap-1"><Package className="w-3 h-3" />Listings</TabsTrigger>
             <TabsTrigger value="notify" className="text-[10px] flex items-center gap-1"><Bell className="w-3 h-3" />Notify</TabsTrigger>
             <TabsTrigger value="support" className="text-[10px] flex items-center gap-1"><Headphones className="w-3 h-3" />Support</TabsTrigger>
+            <TabsTrigger value="waitlist" className="text-[10px]">Waitlist</TabsTrigger>
             <TabsTrigger value="settings" className="text-[10px] flex items-center gap-1"><Flag className="w-3 h-3" />Reports</TabsTrigger>
           </TabsList>
         </div>
@@ -814,6 +843,9 @@ export default function Admin() {
           <SupportTab />
         </TabsContent>
 
+        <TabsContent value="waitlist">
+          <WaitlistTab />
+        </TabsContent>
         <TabsContent value="settings">
           <ReportsTab />
         </TabsContent>
@@ -845,6 +877,9 @@ export default function Admin() {
     </div>
   );
 }
+
+
+
 
 
 
