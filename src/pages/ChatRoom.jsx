@@ -1,21 +1,37 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
-import { useProfile } from "@/lib/useProfile";
-import FileUploadWithCompress from "@/components/FileUploadWithCompress";
-import { Trash2, Check, CheckCheck, Image as ImageIcon, X,
+import GlassButton from "@/components/GlassButton";
+import TrustBanner from "@/components/TrustBanner";
+import TypingIndicator from "@/components/chat/TypingIndicator";
+import ProBadge from "@/components/ProBadge";
+import { Input } from "@/components/ui/input";
+import {
+  ArrowLeft, Send, Mic, MicOff, Paperclip, Play, Pause,
+  Trash2, Check, CheckCheck, Image as ImageIcon, X,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
-import { sendChatNotification } from "@/lib/firebase";
+import FileUploadWithCompress from "@/components/FileUploadWithCompress";
 
-import { uploadToCloudinary } from "@/lib/uploadImage";
-const ADMIN_EMAIL = "futmartzite@gmail.com";
-const SUPPORT_USER_ID = "1629c76b-0af3-48b0-bf03-cf73710e6d57";
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = "futmart_listings";
 
-
+async function uploadToCloudinary(file, folder = "futmart/chat") {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("folder", folder);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Upload failed");
+  const data = await res.json();
+  return data.secure_url;
+}
 
 function DateSeparator({ date }) {
   const label = isToday(date) ? "Today" : isYesterday(date) ? "Yesterday" : format(date, "MMMM d, yyyy");
@@ -100,9 +116,6 @@ function SwipeMessage({ isMe, children, onReply }) {
 
 export default function ChatRoom() {
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
-  const isSpectating = searchParams.get("spectate") === "1";
-  const spectatedUserId = searchParams.get("uid") || null;
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -131,10 +144,6 @@ export default function ChatRoom() {
     },
     enabled: !!id,
   });
-
-  // Admin viewing a support chat acts AS the Support account, not as themselves
-  const isAdminSupportView = user?.email === ADMIN_EMAIL && chat?.seller_id === SUPPORT_USER_ID;
-  const effectiveUserId = isSpectating && spectatedUserId ? spectatedUserId : isAdminSupportView ? SUPPORT_USER_ID : user?.id;
 
   const { data: messages = [], isLoading: msgsLoading } = useQuery({
     queryKey: ["messages", id],
@@ -175,44 +184,23 @@ export default function ChatRoom() {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages.length]);
 
-  // STAGE 1: as soon as an incoming message reaches this device, mark it "delivered".
   useEffect(() => {
-    if (!messages.length || !user?.id || isSpectating) return;
-    const toDeliver = messages.filter(m => m.sender_id !== effectiveUserId && m.transmission_state === "sent");
-    if (!toDeliver.length) return;
-    supabase.from("messages").update({ transmission_state: "delivered" }).in("id", toDeliver.map(m => m.id));
-  }, [messages.length, user?.id]);
-
-  // STAGE 2: mark messages "read" only while this chat is open AND the tab/app is visible.
-  const markAsRead = useCallback(() => {
     if (!messages.length || !user?.id || !chat) return;
-    if (document.hidden) return;
-    const unread = messages.filter(m => m.sender_id !== effectiveUserId && m.transmission_state !== "read");
+    const unread = messages.filter(m => m.sender_id !== user.id && m.transmission_state !== "read");
     if (!unread.length) return;
     (async () => {
       await supabase.from("messages").update({ transmission_state: "read" }).in("id", unread.map(m => m.id));
-      const isBuyer = chat.buyer_id === effectiveUserId;
+      const isBuyer = chat.buyer_id === user.id;
       await supabase
         .from("chats")
         .update(isBuyer ? { unread_count_buyer: 0 } : { unread_count_seller: 0 })
         .eq("id", chat.id);
       queryClient.invalidateQueries({ queryKey: ["chats-unread"] });
     })();
-  }, [messages, user?.id, chat, queryClient]);
+  }, [messages.length, chat?.id]);
 
-  useEffect(() => {
-    const timer = setTimeout(markAsRead, 700);
-    return () => clearTimeout(timer);
-  }, [messages.length, chat?.id, markAsRead]);
-
-  useEffect(() => {
-    const handleVisibility = () => { if (!document.hidden) markAsRead(); };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [markAsRead]);
-
-  const otherName = chat?.seller_id === effectiveUserId ? chat?.buyer_name : chat?.seller_name;
-  const otherId = chat?.seller_id === effectiveUserId ? chat?.buyer_id : chat?.seller_id;
+  const otherName = chat?.seller_id === user?.id ? chat?.buyer_name : chat?.seller_name;
+  const otherId = chat?.seller_id === user?.id ? chat?.buyer_id : chat?.seller_id;
 
   const { data: otherProfile } = useQuery({
     queryKey: ["other-profile", otherId],
@@ -222,20 +210,8 @@ export default function ChatRoom() {
       return data;
     },
     enabled: !!otherId,
-    refetchInterval: 5000,
+    refetchInterval: 15000,
   });
-
-  // single realtime listener â€” keeps the other person's online status live
-  useEffect(() => {
-    if (!otherId) return;
-    const channel = supabase
-      .channel(`presence-${otherId}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${otherId}` },
-        () => queryClient.invalidateQueries({ queryKey: ["other-profile", otherId] })
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [otherId, queryClient]);
 
   const { data: myProfile } = useQuery({
     queryKey: ["my-profile-chat", user?.id],
@@ -254,7 +230,7 @@ export default function ChatRoom() {
   const signalTyping = useCallback(() => {
     if (!chat?.id || !user?.id) return;
     const until = new Date(Date.now() + 4000).toISOString();
-    supabase.from("chats").update({ typing_user_id: effectiveUserId, typing_until: until }).eq("id", chat.id);
+    supabase.from("chats").update({ typing_user_id: user.id, typing_until: until }).eq("id", chat.id);
     clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
       supabase.from("chats").update({ typing_user_id: null, typing_until: null }).eq("id", chat.id);
@@ -272,8 +248,8 @@ export default function ChatRoom() {
         .from("messages")
         .insert({
           chat_id: id,
-          sender_id: effectiveUserId,
-          sender_name: chat?.seller_id === effectiveUserId ? chat.seller_name : chat.buyer_name,
+          sender_id: user.id,
+          sender_name: chat?.seller_id === user.id ? chat.seller_name : chat.buyer_name,
           transmission_state: "sent",
           ...msgData,
         })
@@ -281,20 +257,18 @@ export default function ChatRoom() {
         .single();
       if (error) throw error;
 
-      const isSeller = chat.seller_id === effectiveUserId;
+      const isSeller = chat.seller_id === user.id;
       const currentUnread = isSeller ? (chat.unread_count_buyer || 0) : (chat.unread_count_seller || 0);
       const { error: chatError } = await supabase
         .from("chats")
         .update({
-          last_message: msgData.payload_text || (msgData.attachment_type === "voice_note" ? "ğŸ™ï¸ Voice note" : "ğŸ“· Photo"),
+          last_message: msgData.payload_text || (msgData.attachment_type === "voice_note" ? "­ƒÄÖ´©Å Voice note" : "­ƒôÄ Attachment"),
           last_message_time: new Date().toISOString(),
           ...(isSeller ? { unread_count_buyer: currentUnread + 1 } : { unread_count_seller: currentUnread + 1 }),
         })
         .eq("id", chat.id);
       if (chatError) throw chatError;
 
-      const receiverId = chat?.seller_id === user.id ? chat?.buyer_id : chat?.seller_id;
-      await sendChatNotification(receiverId, chat?.seller_id === user.id ? chat.seller_name : chat.buyer_name, msgData.payload_text || "Sent you a message", supabase);
       return newMsg;
     },
     onSuccess: () => {
@@ -309,7 +283,7 @@ export default function ChatRoom() {
     const msgData = { payload_text: text, attachment_type: "none" };
     if (replyTo) {
       msgData.reply_to_id = replyTo.id;
-      msgData.reply_to_text = replyTo.payload_text || "ğŸ“ Attachment";
+      msgData.reply_to_text = replyTo.payload_text || "­ƒôÄ Attachment";
       msgData.reply_to_sender = replyTo.sender_name;
     }
     clearTyping();
@@ -321,15 +295,23 @@ export default function ChatRoom() {
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 1 * 1024 * 1024) {
-      toast.error(`Image is ${(file.size/1024).toFixed(0)}KB — over 1MB. Please compress it first.`);
-      return;
-    }
     try {
       const url = await uploadToCloudinary(file);
       sendMessage.mutate({ attachment_url: url, attachment_type: "image" });
     } catch {
       toast.error("Image upload failed");
+    }
+  };
+
+  const handleDocUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("File must be under 5MB"); return; }
+    try {
+      const url = await uploadToCloudinary(file);
+      sendMessage.mutate({ attachment_url: url, attachment_type: "document" });
+    } catch {
+      toast.error("Document upload failed");
     }
   };
 
@@ -410,15 +392,15 @@ export default function ChatRoom() {
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${playing ? "bg-orange-400/30" : "bg-white/10"}`}>
             {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </div>
-          <span className="text-sm">ğŸ™ï¸ Voice note</span>
+          <span className="text-sm">­ƒÄÖ´©Å Voice note</span>
         </button>
       );
     }
     if (msg.attachment_type === "document" && msg.attachment_url) {
-      return <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline">ğŸ“„ View document</a>;
+      return <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline">­ƒôä View document</a>;
     }
     if (msg.attachment_type === "image" && msg.attachment_url) {
-      return <img src={msg.attachment_url} alt="" className="max-w-[200px] rounded-lg cursor-pointer allow-interaction" onClick={() => setLightboxImg(msg.attachment_url)} />;
+      return <img src={msg.attachment_url} alt="" className="max-w-[200px] rounded-lg cursor-pointer" onClick={() => setLightboxImg(msg.attachment_url)} />;
     }
     return <p className="text-sm whitespace-pre-wrap break-words">{msg.payload_text}</p>;
   };
@@ -432,9 +414,7 @@ export default function ChatRoom() {
         items.push(<DateSeparator key={`sep-${idx}`} date={msgDate} />);
         lastDate = msgDate;
       }
-      // FIX: optional chaining â€” user can briefly be null on refresh while auth rehydrates,
-      // and without this guard the whole app crashes to a blank screen.
-      const isMe = isSpectating ? msg.sender_id === chat?.seller_id : msg.sender_id === effectiveUserId;
+      const isMe = msg.sender_id === user.id;
       const isRead = msg.transmission_state === "read";
       const isDelivered = msg.transmission_state === "delivered" || isRead;
 
@@ -492,14 +472,6 @@ export default function ChatRoom() {
     return items;
   };
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="w-6 h-6 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-screen max-w-lg mx-auto">
       <div className="glass sticky top-0 z-40 px-3 py-2.5 border-b border-white/5 flex items-center gap-3 shrink-0">
@@ -521,7 +493,7 @@ export default function ChatRoom() {
           <PresenceStatus profile={otherProfile} />
           {chat?.listing_title && (
             <Link to={`/listing/${chat.listing_id}`} className="text-[10px] text-orange-400 truncate block mt-0.5">
-              Â· {chat.listing_title}
+              -À {chat.listing_title}
             </Link>
           )}
         </div>
@@ -536,7 +508,7 @@ export default function ChatRoom() {
           </div>
         ) : messages.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
-            <p className="text-sm">No messages yet. Say hello! ğŸ‘‹</p>
+            <p className="text-sm">No messages yet. Say hello! ­ƒæï</p>
             <p className="text-[11px] text-muted-foreground/50 mt-1">Swipe messages to reply</p>
           </div>
         ) : renderMessages()}
@@ -554,7 +526,7 @@ export default function ChatRoom() {
           <div className="w-0.5 h-8 bg-orange-400 rounded-full shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-[10px] font-semibold text-orange-400 leading-tight">{replyTo.sender_name}</p>
-            <p className="text-[11px] text-muted-foreground truncate">{replyTo.payload_text || "ğŸ“ Attachment"}</p>
+            <p className="text-[11px] text-muted-foreground truncate">{replyTo.payload_text || "­ƒôÄ Attachment"}</p>
           </div>
           <button onClick={() => setReplyTo(null)} className="p-1 shrink-0 rounded-full glass">
             <X className="w-3.5 h-3.5 text-muted-foreground" />
@@ -578,7 +550,14 @@ export default function ChatRoom() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <FileUploadWithCompress onFile={async (file) => { try { const url = await uploadToCloudinary(file, "futmart/chat"); sendMessage.mutate({ attachment_url: url, attachment_type: "image" }); } catch { toast.error("Image upload failed"); } }} accept="image/*"><div className="shrink-0 cursor-pointer p-1"><ImageIcon className="w-5 h-5 text-muted-foreground" /></div></FileUploadWithCompress>
+            <label className="shrink-0 cursor-pointer p-1">
+              <Paperclip className="w-5 h-5 text-muted-foreground" />
+              <input type="file" className="hidden" onChange={handleDocUpload} accept=".pdf,.doc,.docx,.txt" />
+            </label>
+            <label className="shrink-0 cursor-pointer p-1">
+              <ImageIcon className="w-5 h-5 text-muted-foreground" />
+              <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+            </label>
             <Input
               value={text}
               onChange={(e) => { setText(e.target.value); if (e.target.value) signalTyping(); else clearTyping(); }}
@@ -614,19 +593,12 @@ export default function ChatRoom() {
 
       {lightboxImg && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setLightboxImg(null)}>
-          <img src={lightboxImg} alt="" className="max-w-full max-h-full rounded-xl object-contain allow-interaction" />
+          <img src={lightboxImg} alt="" className="max-w-full max-h-full rounded-xl object-contain" />
         </div>
       )}
     </div>
   );
 }
-
-
-
-
-
-
-
 
 
 
