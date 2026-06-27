@@ -126,10 +126,11 @@ export default function CreateListing() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (form.images.length < 3) {
-      toast.error("Please add at least 3 images");
-      return;
-    }
+    if (!form.title.trim()) { toast.error("Please add a title"); return; }
+    if (!form.price || Number(form.price) <= 0) { toast.error("Please add a valid price"); return; }
+    if (form.images.length < 3) { toast.error("Please add at least 3 images"); return; }
+    if (!form.location_text.trim()) { toast.error("Please add a location"); return; }
+    if (!form.description.trim()) { toast.error("Please add a description"); return; }
     if (!form.category) {
       toast.error("Please select a category");
       return;
@@ -175,14 +176,14 @@ export default function CreateListing() {
 
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Title</Label>
-          <Input required value={form.title}
+          <Input value={form.title}
             onChange={e => setForm({ ...form, title: e.target.value })}
             className="glass border-white/10" placeholder="What are you selling?" />
         </div>
 
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Price (₦)</Label>
-          <Input required type="number" min="0" step="1" value={form.price}
+          <Input type="number" min="0" step="1" value={form.price}
             onChange={e => setForm({ ...form, price: e.target.value })}
             className="glass border-white/10" placeholder="0" />
         </div>
@@ -214,14 +215,14 @@ export default function CreateListing() {
 
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Location</Label>
-          <Input required value={form.location_text}
+          <Input value={form.location_text}
             onChange={e => setForm({ ...form, location_text: e.target.value })}
             className="glass border-white/10" placeholder="City or area" />
         </div>
 
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Description</Label>
-          <Textarea required value={form.description}
+          <Textarea value={form.description}
             onChange={e => setForm({ ...form, description: e.target.value })}
             className="glass border-white/10 min-h-[100px]" placeholder="Describe your item..." />
         </div>
@@ -234,6 +235,7 @@ export default function CreateListing() {
     </div>
   );
 }
+
 
 
 

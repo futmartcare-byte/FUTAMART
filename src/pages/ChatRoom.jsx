@@ -333,7 +333,7 @@ export default function ChatRoom() {
       setIsRecording(true);
       setRecordingTime(0);
       timerRef.current = setInterval(() => {
-        setRecordingTime(prev => { if (prev >= 119) { stopRecording(); return 120; } return prev + 1; });
+        setRecordingTime(prev => { if (prev >= 59) { stopRecording(); return 60; } return prev + 1; });
       }, 1000);
     } catch {
       toast.error("Microphone access denied");
@@ -376,11 +376,13 @@ export default function ChatRoom() {
   };
 
   const playMsgVoice = (msgId, url) => {
-    if (playingMsgId === msgId) { msgAudioRef.current?.pause(); setPlayingMsgId(null); return; }
+    if (playingMsgId === msgId) { msgAudioRef.current?.pause(); setPlayingMsgId(null); setPlayingProgress(0); return; }
     if (msgAudioRef.current) msgAudioRef.current.pause();
     const audio = new Audio(url);
     msgAudioRef.current = audio;
-    audio.onended = () => setPlayingMsgId(null);
+    audio.onended = () => { setPlayingMsgId(null); setPlayingProgress(0); setPlayingDuration(0); };
+    audio.onloadedmetadata = () => setPlayingDuration(audio.duration);
+    audio.ontimeupdate = () => setPlayingProgress(audio.duration ? (audio.currentTime / audio.duration) * 100 : 0);
     audio.play();
     setPlayingMsgId(msgId);
   };
@@ -391,16 +393,29 @@ export default function ChatRoom() {
     if (msg.attachment_type === "voice_note" && msg.attachment_url) {
       const playing = playingMsgId === msg.id;
       return (
-        <button onClick={() => playMsgVoice(msg.id, msg.attachment_url)} className="flex items-center gap-2 py-1">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${playing ? "bg-orange-400/30" : "bg-white/10"}`}>
+        <div className="flex items-center gap-2 py-1 min-w-[170px]">
+          <button onClick={() => playMsgVoice(msg.id, msg.attachment_url)} className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all ${playing ? "bg-orange-400/40" : "bg-white/10"}`}>
             {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          </button>
+          <div className="flex-1 flex items-center gap-[2px] h-7">
+            {Array.from({ length: 24 }).map((_, i) => {
+              const heights = [40,65,30,80,50,90,35,70,45,60,25,75,55,85,40,65,30,80,50,90,35,70,45,60];
+              const barProgress = (i / 24) * 100;
+              const isPast = playing && barProgress <= playingProgress;
+              return (
+                <div key={i} className="w-[2.5px] rounded-full transition-colors duration-150"
+                  style={{ height: heights[i] + "%", background: isPast ? "#FF8C00" : "rgba(255,255,255,0.35)" }} />
+              );
+            })}
           </div>
-          <span className="text-sm">Voice note</span>
-        </button>
+          <span className="text-[10px] text-white/70 shrink-0 tabular-nums">
+            {playing ? formatTime(Math.round((playingProgress / 100) * playingDuration)) : formatTime(msg.voice_duration || 0)}
+          </span>
+        </div>
       );
     }
     if (msg.attachment_type === "document" && msg.attachment_url) {
-      return <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline">­View document</a>;
+      return <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline">View document</a>;
     }
     if (msg.attachment_type === "image" && msg.attachment_url) {
       return <img src={msg.attachment_url} alt="" className="max-w-[200px] rounded-lg cursor-pointer" onClick={() => setLightboxImg(msg.attachment_url)} />;
@@ -594,6 +609,10 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
+
+
 
 
 
