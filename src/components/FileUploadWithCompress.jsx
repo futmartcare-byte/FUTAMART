@@ -3,7 +3,7 @@ import { compressImage } from "@/lib/imageUtils";
 import { toast } from "sonner";
 
 const MIN_KB = 800;
-const MAX_KB = 1024 * 1024; // 1GB in KB
+const MAX_KB = 1024 * 1024;
 
 export default function FileUploadWithCompress({ onFile, accept = "image/*", multiple = false, children }) {
   const [pendingFiles, setPendingFiles] = useState([]);
@@ -17,9 +17,7 @@ export default function FileUploadWithCompress({ onFile, accept = "image/*", mul
     const oversized = files.filter(f => f.size > 800 * 1024);
     const fine = files.filter(f => f.size <= 800 * 1024);
     fine.forEach(f => onFile(f));
-    if (oversized.length) {
-      setPendingFiles(oversized);
-    }
+    if (oversized.length) setPendingFiles(oversized);
     e.target.value = "";
   };
 
@@ -29,7 +27,7 @@ export default function FileUploadWithCompress({ onFile, accept = "image/*", mul
     try {
       for (const file of pendingFiles) {
         const compressed = await compressImage(file, targetKB);
-        toast.success(${file.name} compressed to KB);
+        toast.success(compressed.name + " compressed to " + (compressed.size / 1024).toFixed(0) + "KB");
         onFile(compressed);
       }
       setPendingFiles([]);
@@ -41,9 +39,9 @@ export default function FileUploadWithCompress({ onFile, accept = "image/*", mul
   };
 
   const formatSize = (kb) => {
-    if (kb >= 1024 * 1024) return ${(kb / (1024 * 1024)).toFixed(1)}GB;
-    if (kb >= 1024) return ${(kb / 1024).toFixed(1)}MB;
-    return ${kb}KB;
+    if (kb >= 1024 * 1024) return (kb / (1024 * 1024)).toFixed(1) + "GB";
+    if (kb >= 1024) return (kb / 1024).toFixed(1) + "MB";
+    return kb + "KB";
   };
 
   return (
@@ -86,7 +84,7 @@ export default function FileUploadWithCompress({ onFile, accept = "image/*", mul
               disabled={compressing}
               className="flex-1 py-2 rounded-xl text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-400/30"
             >
-              {compressing ? "Compressing..." : Compress to }
+              {compressing ? "Compressing..." : "Compress to " + formatSize(targetKB)}
             </button>
             <button
               onClick={() => setPendingFiles([])}
