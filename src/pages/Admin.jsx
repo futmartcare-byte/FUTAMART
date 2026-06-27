@@ -241,7 +241,7 @@ function SupportTab() {
               key={chat.id}
               className="flex items-center gap-3 p-3 rounded-2xl hover:brightness-110 transition-all cursor-pointer"
               style={{ background: hasUnread ? "linear-gradient(135deg, rgba(255,107,0,0.18), rgba(255,140,0,0.08))" : "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(251,191,36,0.05))" }}
-              onClick={() => navigate(`/chat/${chat.id}`)}
+              onClick={() => navigate(`/chat/${chat.id}?from=admin`)}
             >
               <div className="w-12 h-12 rounded-full ring-1 ring-white/10 bg-gradient-to-br from-orange-500/20 to-orange-500/5 flex items-center justify-center overflow-hidden shrink-0">
                 {chat.buyer_avatar ? (
@@ -352,7 +352,7 @@ function SpectateChatsModal({ profile, onClose }) {
               ? { name: chat.seller_name, avatar: chat.seller_avatar }
               : { name: chat.buyer_name, avatar: chat.buyer_avatar };
             return (
-              <button key={chat.id} onClick={() => { navigate(`/chat/${chat.id}?spectate=1&uid=${profile.id}`); onClose(); }}
+              <button key={chat.id} onClick={() => { navigate(`/chat/${chat.id}?spectate=1&uid=${profile.id}&from=admin`); onClose(); }}
                 className="w-full flex items-center gap-3 p-3 glass rounded-xl hover:brightness-110 text-left">
                 <div className="w-9 h-9 rounded-full bg-orange-500/20 flex items-center justify-center shrink-0 overflow-hidden">
                   {other.avatar
@@ -911,6 +911,7 @@ export default function Admin() {
     </div>
   );
 }
+
 
 
 
