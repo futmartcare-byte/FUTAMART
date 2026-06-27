@@ -477,7 +477,7 @@ export default function ChatRoom() {
   return (
     <div className="flex flex-col h-[100dvh] max-w-lg mx-auto">
       <div className="glass sticky top-0 z-40 px-3 py-2.5 border-b border-white/5 flex items-center gap-3 shrink-0">
-        <button onClick={() => navigate(searchParams.get("from") === "admin" ? "/admin" : "/chats")} className="p-2 -ml-1 shrink-0">
+        <button onClick={() => { const from = searchParams.get("from"); navigate(from === "admin" ? "/admin" : "/chats"); }} className="p-2 -ml-1 shrink-0">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <Link to={`/seller/${otherId}`} className="shrink-0">
@@ -601,6 +601,7 @@ export default function ChatRoom() {
     </div>
   );
 }
+
 
 
 
