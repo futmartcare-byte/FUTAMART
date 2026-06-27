@@ -52,11 +52,7 @@ export default function Home() {
     }
     const { data, error } = await query;
     if (error) throw error;
-    const proListings = data.filter(l => l.seller_is_pro);
-    const regularListings = data.filter(l => !l.seller_is_pro);
-    const visibleRegular = regularListings.filter(() => Math.random() < 0.7);
-    const combined = [...proListings, ...visibleRegular].sort(() => Math.random() - 0.5);
-    const shuffled = combined;
+    const shuffled = [...data].sort(() => Math.random() - 0.5);
     if (replace) {
       setListings(shuffled);
     } else {
@@ -316,5 +312,6 @@ export default function Home() {
     </div>
   );
 }
+
 
 

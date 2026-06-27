@@ -94,7 +94,16 @@ export default function CreateListing() {
   });
 
   const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files);
+    const rawFiles = Array.from(e.target.files);
+    const files = [];
+    for (const f of rawFiles) {
+      if (f.size > MAX_FILE_SIZE) {
+        toast.error(`${f.name} is over 1MB — skipped. Please compress it first.`);
+      } else {
+        files.push(f);
+      }
+    }
+    if (!files.length) return;
     if (form.images.length + files.length > 15) {
       toast.error("Maximum 15 images");
       return;
@@ -241,4 +250,5 @@ export default function CreateListing() {
     </div>
   );
 }
+
 

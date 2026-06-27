@@ -64,6 +64,10 @@ export default function ProfileEdit() {
   });
 
   const uploadAvatar = async (file) => {
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error(`Image is ${(file.size/1024).toFixed(0)}KB — over 1MB. Please compress it first.`);
+      return;
+    }
     setUploading(true);
     try {
       const url = await uploadToCloudinary(file, "futmart/avatars");
@@ -144,3 +148,4 @@ export default function ProfileEdit() {
     </div>
   );
 }
+

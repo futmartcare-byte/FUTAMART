@@ -326,6 +326,10 @@ export default function ChatRoom() {
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error(`Image is ${(file.size/1024).toFixed(0)}KB — over 1MB. Please compress it first.`);
+      return;
+    }
     try {
       const url = await uploadToCloudinary(file);
       sendMessage.mutate({ attachment_url: url, attachment_type: "image" });
@@ -624,6 +628,7 @@ export default function ChatRoom() {
     </div>
   );
 }
+
 
 
 
