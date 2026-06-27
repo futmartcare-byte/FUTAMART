@@ -117,6 +117,7 @@ function SwipeMessage({ isMe, children, onReply }) {
 export default function ChatRoom() {
   const { id } = useParams();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const messagesEndRef = useRef(null);
@@ -593,6 +594,8 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
 
 
 
