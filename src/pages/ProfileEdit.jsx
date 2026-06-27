@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Camera, User, Phone, MapPin, AtSign, FileText } from "lucide-react";
+import FileUploadWithCompress from "@/components/FileUploadWithCompress";
 import { toast } from "sonner";
 
 const ADMIN_EMAIL = "futmartzite@gmail.com";
@@ -64,10 +65,6 @@ export default function ProfileEdit() {
   });
 
   const uploadAvatar = async (file) => {
-    if (file.size > 1 * 1024 * 1024) {
-      toast.error(`Image is ${(file.size/1024).toFixed(0)}KB — over 1MB. Please compress it first.`);
-      return;
-    }
     setUploading(true);
     try {
       const url = await uploadToCloudinary(file, "futmart/avatars");
@@ -94,18 +91,7 @@ export default function ProfileEdit() {
 
       <div className="p-4 space-y-4 pb-24">
         <GlassCard className="p-5 flex flex-col items-center gap-3">
-          <label className="relative cursor-pointer group">
-            <div className="w-20 h-20 rounded-full glass flex items-center justify-center text-2xl font-bold text-orange-400 overflow-hidden">
-              {form.avatar_url
-                ? <img src={form.avatar_url} alt="" className="w-full h-full object-cover" />
-                : <User className="w-8 h-8 text-muted-foreground" />}
-            </div>
-            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100">
-              <Camera className="w-6 h-6 text-white" />
-            </div>
-            <input type="file" accept="image/*" className="hidden"
-              onChange={e => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); }} />
-          </label>
+          <FileUploadWithCompress onFile={uploadAvatar} accept="image/*"><div className="relative cursor-pointer group"><div className="w-20 h-20 rounded-full glass flex items-center justify-center text-2xl font-bold text-orange-400 overflow-hidden">{form.avatar_url ? <img src={form.avatar_url} alt="" className="w-full h-full object-cover" /> : <User className="w-8 h-8 text-muted-foreground" />}</div><div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100"><Camera className="w-6 h-6 text-white" /></div></div></FileUploadWithCompress>
           <p className="text-xs text-muted-foreground">{uploading ? "Uploading..." : "Tap to change photo"}</p>
         </GlassCard>
 
@@ -148,4 +134,7 @@ export default function ProfileEdit() {
     </div>
   );
 }
+
+
+
 
