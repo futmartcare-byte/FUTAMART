@@ -1,4 +1,4 @@
-﻿import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import PWAInstallBanner from "./PWAInstallBanner";
 import PullToRefresh from "./PullToRefresh";
@@ -16,13 +16,13 @@ export default function AppLayout() {
   const isHome = location.pathname === "/";
 
   const content = (
-    <main className={hideNav ? "" : "pb-20"}>
+    <main className={(hideNav ? "" : "pb-20") + " flex-1 overflow-y-auto"}>
       <Outlet />
     </main>
   );
 
   return (
-    <div className="min-h-screen max-w-lg mx-auto" style={{ background: "transparent" }}>
+    <div className="h-[100dvh] flex flex-col max-w-lg mx-auto" style={{ background: "transparent" }}>
       <PresenceWrapper />
       {isHome ? <PullToRefresh>{content}</PullToRefresh> : content}
       {!hideNav && <BottomNav />}
@@ -31,3 +31,4 @@ export default function AppLayout() {
     </div>
   );
 }
+
