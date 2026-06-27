@@ -1,16 +1,17 @@
-import { useNavigate } from "react-router-dom";
+import { Eye, useNavigate } from "react-router-dom";
 import GlassCard from "@/components/GlassCard";
 import GlassButton from "@/components/GlassButton";
-import { supabase } from "@/api/supabaseClient";
-import { useAuth } from "@/lib/AuthContext";
-import { toast } from "sonner";
+import { Eye, supabase } from "@/api/supabaseClient";
+import { Eye, useAuth } from "@/lib/AuthContext";
+import { Eye, toast } from "sonner";
 import ProCrown from "@/components/ProCrown";
-import { ArrowLeft, Check, Star, Shield, Zap, BadgeCheck, Headphones } from "lucide-react";
+import { Eye, ArrowLeft, Check, Star, Shield, Zap, BadgeCheck, Headphones } from "lucide-react";
 
 const FEATURES = [
   { icon: Star, label: "Featured listings priority", desc: "Your items appear at the top of search results" },
   { icon: Shield, label: "Pro Seller badge", desc: "Stand out with a verified crown badge" },
   { icon: BadgeCheck, label: "Verified Seller status", desc: "Build trust with buyers instantly" },
+  { icon: Eye, label: "100% listing visibility", desc: "Your listings are shown to every user on the home screen" },
   { icon: Zap, label: "Up to 30 listings", desc: "Post more items than standard sellers" },
   { icon: Headphones, label: "Priority support", desc: "Get faster responses from our team" },
 ];
@@ -85,6 +86,8 @@ export default function ProUpgrade() {
     </div>
   );
 }
+
+
 
 
 
