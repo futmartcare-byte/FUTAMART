@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { compressImage } from "@/lib/imageUtils";
 import { toast } from "sonner";
+import { AlertTriangle } from "lucide-react";
 
 const LIMIT_KB = 900;
 
@@ -50,27 +51,42 @@ export default function FileUploadWithCompress({ onFile, accept = "image/*", mul
         onChange={handleChange}
       />
       {pendingFiles.length > 0 && (
-        <div className="mt-2 p-4 glass rounded-2xl border border-orange-400/30 space-y-3">
-          <p className="text-xs text-orange-400 font-semibold">
-            {pendingFiles.length} image{pendingFiles.length > 1 ? "s are" : " is"} over 900KB
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCompress}
-              disabled={compressing}
-              className="flex-1 py-2 rounded-xl text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-400/30"
-            >
-              {compressing ? "Compressing..." : "Compress"}
-            </button>
-            <button
-              onClick={() => setPendingFiles([])}
-              className="px-3 py-2 rounded-xl text-xs text-muted-foreground glass"
-            >
-              Cancel
-            </button>
+        <div className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4" onClick={() => !compressing && setPendingFiles([])}>
+          <div className="glass rounded-2xl border border-red-500/40 bg-red-500/10 p-5 max-w-sm w-full space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <p className="font-bold text-foreground text-sm">Image Too Large</p>
+                <p className="text-xs text-muted-foreground">
+                  {pendingFiles.length > 1 ? `${pendingFiles.length} images are` : "This image is"} over 900KB
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Compress {pendingFiles.length > 1 ? "them" : "it"} to continue, or cancel and choose a different file.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCompress}
+                disabled={compressing}
+                className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-red-500 text-white disabled:opacity-60"
+              >
+                {compressing ? "Compressing..." : "Compress"}
+              </button>
+              <button
+                onClick={() => setPendingFiles([])}
+                disabled={compressing}
+                className="px-4 py-2.5 rounded-xl text-sm text-muted-foreground glass"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
+
