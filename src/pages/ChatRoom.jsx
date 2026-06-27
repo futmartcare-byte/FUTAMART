@@ -552,14 +552,6 @@ export default function ChatRoom() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <label className="shrink-0 cursor-pointer p-1">
-              <Paperclip className="w-5 h-5 text-muted-foreground" />
-              <input type="file" className="hidden" onChange={handleDocUpload} accept=".pdf,.doc,.docx,.txt" />
-            </label>
-            <label className="shrink-0 cursor-pointer p-1">
-              <ImageIcon className="w-5 h-5 text-muted-foreground" />
-              <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
-            </label>
             <Input
               value={text}
               onChange={(e) => { setText(e.target.value); if (e.target.value) signalTyping(); else clearTyping(); }}
@@ -601,6 +593,8 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
 
 
 
