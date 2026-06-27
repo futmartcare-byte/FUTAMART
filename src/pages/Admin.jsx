@@ -27,6 +27,36 @@ import { uploadToCloudinary } from "@/lib/uploadImage";
 
 
 
+// ---- Suggestions Tab ----
+function SuggestionsTab() {
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    supabase.from("suggestions").select("*").order("created_at", { ascending: false }).then(({ data }) => {
+      setSuggestions(data || []);
+      setLoading(false);
+    });
+  }, []);
+  const COLORS = { "UI / Design": "text-purple-400", "New Feature": "text-green-400", "Bug Report": "text-red-400", "Performance": "text-blue-400", "Chat": "text-cyan-400", "Listings": "text-orange-400", "Notifications": "text-yellow-400", "Other": "text-muted-foreground" };
+  return (
+    <div className="space-y-3 p-4">
+      <h2 className="text-sm font-bold text-foreground">User Suggestions ({suggestions.length})</h2>
+      {loading ? <div className="text-xs text-muted-foreground">Loading...</div> : suggestions.length === 0 ? (
+        <div className="text-xs text-muted-foreground">No suggestions yet.</div>
+      ) : suggestions.map((s) => (
+        <div key={s.id} className="glass rounded-2xl p-3 space-y-1">
+          <div className="flex items-center justify-between">
+            <span className={"text-xs font-bold " + (COLORS[s.category] || "text-muted-foreground")}>{s.category}</span>
+            <span className="text-[10px] text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</span>
+          </div>
+          <p className="text-sm text-foreground">{s.message}</p>
+          <p className="text-[10px] text-muted-foreground">— {s.username}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ---- Waitlist Tab ----
 function WaitlistTab() {
   const [waitlist, setWaitlist] = useState([]);
@@ -803,13 +833,14 @@ export default function Admin() {
 
       <Tabs defaultValue="dashboard" className="w-full">
         <div className="overflow-x-auto no-scrollbar">
-          <TabsList className="glass w-max min-w-full grid grid-cols-7 h-10 mx-0 rounded-none border-b border-white/5">
+          <TabsList className="glass w-max min-w-full grid grid-cols-8 h-10 mx-0 rounded-none border-b border-white/5">
             <TabsTrigger value="dashboard" className="text-[10px] flex items-center gap-1"><BarChart3 className="w-3 h-3" />Stats</TabsTrigger>
             <TabsTrigger value="users" className="text-[10px] flex items-center gap-1"><Users className="w-3 h-3" />Users</TabsTrigger>
             <TabsTrigger value="listings" className="text-[10px] flex items-center gap-1"><Package className="w-3 h-3" />Listings</TabsTrigger>
             <TabsTrigger value="notify" className="text-[10px] flex items-center gap-1"><Bell className="w-3 h-3" />Notify</TabsTrigger>
             <TabsTrigger value="support" className="text-[10px] flex items-center gap-1"><Headphones className="w-3 h-3" />Support</TabsTrigger>
             <TabsTrigger value="waitlist" className="text-[10px]">Waitlist</TabsTrigger>
+            <TabsTrigger value="suggestions" className="text-[10px] flex items-center gap-1"><Lightbulb className="w-3 h-3" />Ideas</TabsTrigger>
             <TabsTrigger value="settings" className="text-[10px] flex items-center gap-1"><Flag className="w-3 h-3" />Reports</TabsTrigger>
           </TabsList>
         </div>
@@ -843,6 +874,9 @@ export default function Admin() {
           <SupportTab />
         </TabsContent>
 
+        <TabsContent value="suggestions">
+          <SuggestionsTab />
+        </TabsContent>
         <TabsContent value="waitlist">
           <WaitlistTab />
         </TabsContent>
@@ -877,6 +911,10 @@ export default function Admin() {
     </div>
   );
 }
+
+
+
+
 
 
 

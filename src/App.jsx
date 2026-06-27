@@ -30,6 +30,7 @@ import Onboarding from "@/pages/Onboarding";
 import Notifications from "@/pages/Notifications";
 import ProUpgrade from "@/pages/ProUpgrade";
 import ReportPage from "@/pages/ReportPage";
+import Suggestions from "@/pages/Suggestions";
 import ReportPage2 from "@/pages/ReportPage2";
 import ProfileEdit from "@/pages/ProfileEdit";
 
@@ -87,6 +88,7 @@ const AuthenticatedApp = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/pro-upgrade" element={<ProUpgrade />} />
           <Route path="/report" element={<ReportPage />} />
+          <Route path="/suggestions" element={<Suggestions />} />
           <Route path="/report2" element={<ReportPage2 />} />
           <Route path="/onboarding-edit" element={<ProfileEdit />} />
         </Route>
