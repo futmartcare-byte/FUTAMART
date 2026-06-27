@@ -127,6 +127,8 @@ export default function ChatRoom() {
   const [recordingTime, setRecordingTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingMsgId, setPlayingMsgId] = useState(null);
+  const [playingProgress, setPlayingProgress] = useState(0);
+  const [playingDuration, setPlayingDuration] = useState(0);
   const [lightboxImg, setLightboxImg] = useState(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -357,7 +359,7 @@ export default function ChatRoom() {
     if (!recordedBlob) return;
     try {
       const url = await uploadToCloudinary(new File([recordedBlob], "voice.webm", { type: "audio/webm" }));
-      sendMessage.mutate({ attachment_url: url, attachment_type: "voice_note" });
+      sendMessage.mutate({ attachment_url: url, attachment_type: "voice_note", voice_duration: recordingTime });
       setRecordedBlob(null);
       setRecordingTime(0);
     } catch {
@@ -599,6 +601,10 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
+
+
 
 
 
