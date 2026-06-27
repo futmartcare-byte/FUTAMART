@@ -1,16 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/api/supabaseClient";
-import { useAuth } from "@/lib/AuthContext";
-import GlassButton from "@/components/GlassButton";
-import TrustBanner from "@/components/TrustBanner";
-import TypingIndicator from "@/components/chat/TypingIndicator";
-import ProBadge from "@/components/ProBadge";
-import { Input } from "@/components/ui/input";
-import {
-  ArrowLeft, Send, Mic, MicOff, Paperclip, Play, Pause,
-  Trash2, Check, CheckCheck, Image as ImageIcon, X,
+import FileUploadWithCompress from "@/components/FileUploadWithCompress";
+import { Trash2, Check, CheckCheck, Image as ImageIcon, X,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
@@ -583,10 +572,7 @@ export default function ChatRoom() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <label className="shrink-0 cursor-pointer p-1">
-              <ImageIcon className="w-5 h-5 text-muted-foreground" />
-              <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
-            </label>
+            <FileUploadWithCompress onFile={async (file) => { try { const url = await uploadToCloudinary(file, "futmart/chat"); sendMessage.mutate({ attachment_url: url, attachment_type: "image" }); } catch { toast.error("Image upload failed"); } }} accept="image/*"><div className="shrink-0 cursor-pointer p-1"><ImageIcon className="w-5 h-5 text-muted-foreground" /></div></FileUploadWithCompress>
             <Input
               value={text}
               onChange={(e) => { setText(e.target.value); if (e.target.value) signalTyping(); else clearTyping(); }}
@@ -628,6 +614,7 @@ export default function ChatRoom() {
     </div>
   );
 }
+
 
 
 

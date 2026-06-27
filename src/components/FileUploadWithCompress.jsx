@@ -1,31 +1,38 @@
-import { useState } from "react";
-import { compressImage, MAX_FILE_SIZE } from "@/lib/imageUtils";
+import { useState, useRef } from "react";
+import { compressImage } from "@/lib/imageUtils";
 import { toast } from "sonner";
 
-export default function FileUploadWithCompress({ onFile, accept = "image/*", children }) {
-  const [pendingFile, setPendingFile] = useState(null);
+const MIN_KB = 800;
+const MAX_KB = 1024 * 1024; // 1GB in KB
+
+export default function FileUploadWithCompress({ onFile, accept = "image/*", multiple = false, children }) {
+  const [pendingFiles, setPendingFiles] = useState([]);
   const [compressing, setCompressing] = useState(false);
+  const [targetKB, setTargetKB] = useState(800);
+  const inputRef = useRef();
 
   const handleChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size <= MAX_FILE_SIZE) {
-      onFile(file);
-    } else {
-      setPendingFile(file);
-      toast.error(File is KB — over 1MB limit. Please compress it.);
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const oversized = files.filter(f => f.size > 800 * 1024);
+    const fine = files.filter(f => f.size <= 800 * 1024);
+    fine.forEach(f => onFile(f));
+    if (oversized.length) {
+      setPendingFiles(oversized);
     }
     e.target.value = "";
   };
 
-  const handleCompress = async (targetKB) => {
-    if (!pendingFile) return;
+  const handleCompress = async () => {
+    if (!pendingFiles.length) return;
     setCompressing(true);
     try {
-      const compressed = await compressImage(pendingFile, targetKB);
-      toast.success(Compressed to KB);
-      onFile(compressed);
-      setPendingFile(null);
+      for (const file of pendingFiles) {
+        const compressed = await compressImage(file, targetKB);
+        toast.success(${file.name} compressed to KB);
+        onFile(compressed);
+      }
+      setPendingFiles([]);
     } catch {
       toast.error("Compression failed");
     } finally {
@@ -33,36 +40,61 @@ export default function FileUploadWithCompress({ onFile, accept = "image/*", chi
     }
   };
 
+  const formatSize = (kb) => {
+    if (kb >= 1024 * 1024) return ${(kb / (1024 * 1024)).toFixed(1)}GB;
+    if (kb >= 1024) return ${(kb / 1024).toFixed(1)}MB;
+    return ${kb}KB;
+  };
+
   return (
     <div>
-      <label className="cursor-pointer">
+      <label className="cursor-pointer" onClick={() => inputRef.current?.click()}>
         {children}
-        <input type="file" accept={accept} className="hidden" onChange={handleChange} />
       </label>
-      {pendingFile && (
-        <div className="mt-2 p-3 glass rounded-2xl border border-orange-400/30 space-y-2">
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        multiple={multiple}
+        className="hidden"
+        onChange={handleChange}
+      />
+      {pendingFiles.length > 0 && (
+        <div className="mt-2 p-4 glass rounded-2xl border border-orange-400/30 space-y-3">
           <p className="text-xs text-orange-400 font-semibold">
-            File too large ({(pendingFile.size / 1024).toFixed(0)}KB). Choose compression:
+            {pendingFiles.length} file{pendingFiles.length > 1 ? "s" : ""} over 800KB — choose target size:
           </p>
+          <div className="space-y-1">
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>800KB</span>
+              <span className="text-foreground font-bold">{formatSize(targetKB)}</span>
+              <span>1GB</span>
+            </div>
+            <input
+              type="range"
+              min={MIN_KB}
+              max={MAX_KB}
+              step={100}
+              value={targetKB}
+              onChange={(e) => setTargetKB(Number(e.target.value))}
+              className="w-full accent-orange-400"
+            />
+          </div>
           <div className="flex gap-2">
             <button
-              onClick={() => handleCompress(900)}
+              onClick={handleCompress}
               disabled={compressing}
-              className="flex-1 py-1.5 rounded-xl text-xs font-bold glass text-foreground"
+              className="flex-1 py-2 rounded-xl text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-400/30"
             >
-              {compressing ? "Compressing..." : "Compress to 900KB"}
+              {compressing ? "Compressing..." : Compress to }
             </button>
             <button
-              onClick={() => handleCompress(1000)}
-              disabled={compressing}
-              className="flex-1 py-1.5 rounded-xl text-xs font-bold glass text-foreground"
+              onClick={() => setPendingFiles([])}
+              className="px-3 py-2 rounded-xl text-xs text-muted-foreground glass"
             >
-              {compressing ? "Compressing..." : "Compress to 1MB"}
+              Cancel
             </button>
           </div>
-          <button onClick={() => setPendingFile(null)} className="text-[10px] text-muted-foreground w-full text-center">
-            Cancel
-          </button>
         </div>
       )}
     </div>

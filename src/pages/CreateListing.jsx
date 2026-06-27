@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Camera, X, Loader2 } from "lucide-react";
+import FileUploadWithCompress from "@/components/FileUploadWithCompress";
 import { toast } from "sonner";
 
 const CATEGORIES = [
@@ -162,24 +163,7 @@ export default function CreateListing() {
               </div>
             ))}
             {form.images.length < 15 && (
-              <label className="aspect-square rounded-xl glass flex flex-col items-center justify-center cursor-pointer hover:brightness-110">
-                {uploading
-                  ? <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
-                  : (
-                    <>
-                      <Camera className="w-5 h-5 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground mt-1">Add</span>
-                    </>
-                  )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  disabled={uploading}
-                />
-              </label>
+              <FileUploadWithCompress onFile={async (file) => { if (form.images.length >= 15) { toast.error("Maximum 15 images"); return; } setUploading(true); try { const url = await uploadToCloudinary(file, "futmart/listings"); setForm(prev => ({ ...prev, images: [...prev.images, url] })); } catch { toast.error("Upload failed"); } finally { setUploading(false); } }} accept="image/*" multiple={false}><div className="aspect-square rounded-xl glass flex flex-col items-center justify-center cursor-pointer hover:brightness-110">{uploading ? <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" /> : <><Camera className="w-5 h-5 text-muted-foreground" /><span className="text-[10px] text-muted-foreground mt-1">Add</span></>}</div></FileUploadWithCompress>
             )}
           </div>
           {uploading && (
@@ -250,5 +234,6 @@ export default function CreateListing() {
     </div>
   );
 }
+
 
 
