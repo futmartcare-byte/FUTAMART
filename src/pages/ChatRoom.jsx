@@ -1,3 +1,9 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/api/supabaseClient";
+import { useAuth } from "@/lib/AuthContext";
+import { useProfile } from "@/lib/useProfile";
 import FileUploadWithCompress from "@/components/FileUploadWithCompress";
 import { Trash2, Check, CheckCheck, Image as ImageIcon, X,
 } from "lucide-react";
@@ -614,6 +620,7 @@ export default function ChatRoom() {
     </div>
   );
 }
+
 
 
 
