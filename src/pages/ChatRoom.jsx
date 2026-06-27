@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import FileUploadWithCompress from "@/components/FileUploadWithCompress";
+import { uploadToCloudinary } from "@/lib/uploadImage";
 import FileUploadWithCompress from "@/components/FileUploadWithCompress";
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -593,6 +595,7 @@ export default function ChatRoom() {
     </div>
   );
 }
+
 
 
 
