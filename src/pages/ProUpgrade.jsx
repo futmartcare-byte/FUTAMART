@@ -1,9 +1,9 @@
-import { Eye, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import GlassCard from "@/components/GlassCard";
 import GlassButton from "@/components/GlassButton";
-import { Eye, supabase } from "@/api/supabaseClient";
-import { Eye, useAuth } from "@/lib/AuthContext";
-import { Eye, toast } from "sonner";
+import { supabase } from "@/api/supabaseClient";
+import { useAuth } from "@/lib/AuthContext";
+import { toast } from "sonner";
 import ProCrown from "@/components/ProCrown";
 import { Eye, ArrowLeft, Check, Star, Shield, Zap, BadgeCheck, Headphones } from "lucide-react";
 
@@ -86,6 +86,7 @@ export default function ProUpgrade() {
     </div>
   );
 }
+
 
 
 
