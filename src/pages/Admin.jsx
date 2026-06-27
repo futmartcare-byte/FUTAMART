@@ -638,7 +638,7 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
           {sentNotifications.slice(0, 20).map(n => (
             <GlassCard key={n.id} className="p-3 space-y-2">
               <div className="flex items-start gap-3">
-              {n.image_url && <img src={n.image_url} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />}
+                {n.image_url && <img src={n.image_url} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{n.title}</p>
                 <p className="text-xs text-muted-foreground truncate">{n.message}</p>
