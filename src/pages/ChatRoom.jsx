@@ -15,8 +15,6 @@ import {
 import { format, isToday, isYesterday, isSameDay, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import FileUploadWithCompress from "@/components/FileUploadWithCompress";
-import { uploadToCloudinary } from "@/lib/uploadImage";
-import FileUploadWithCompress from "@/components/FileUploadWithCompress";
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = "futmart_listings";
@@ -595,6 +593,7 @@ export default function ChatRoom() {
     </div>
   );
 }
+
 
 
 
