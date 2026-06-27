@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, useState } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef } from "react";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
@@ -154,3 +154,4 @@ export default function SavedAds() {
     </div>
   );
 }
+
