@@ -8,7 +8,7 @@ const FEATURES = [
   { icon: Star, label: "Featured listings priority", desc: "Your items appear at the top of search results" },
   { icon: Shield, label: "Pro Seller badge", desc: "Stand out with a verified crown badge" },
   { icon: BadgeCheck, label: "Verified Seller status", desc: "Build trust with buyers instantly" },
-  { icon: Zap, label: "Up to 50 listings", desc: "Post more items than standard sellers" },
+  { icon: Zap, label: "Up to 30 listings", desc: "Post more items than standard sellers" },
   { icon: Headphones, label: "Priority support", desc: "Get faster responses from our team" },
 ];
 
@@ -81,3 +81,4 @@ export default function ProUpgrade() {
     </div>
   );
 }
+
