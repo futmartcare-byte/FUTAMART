@@ -64,7 +64,7 @@ export default function EditListing() {
 
   const updateListing = useMutation({
     mutationFn: async (data) => {
-      if ((listing.edit_history_count || 0) >= 5) {
+      if ((listing.edit_history_count || 0) >= 15) {
         setShowLocked(true);
         throw new Error("Edit limit reached");
       }
@@ -93,8 +93,8 @@ export default function EditListing() {
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    if (form.images.length + files.length > 15) {
-      toast.error("Maximum 15 images");
+    if (form.images.length + files.length > 5) {
+      toast.error("Maximum 5 images");
       return;
     }
     setUploading(true);
@@ -118,7 +118,7 @@ export default function EditListing() {
     );
   }
 
-  const editsRemaining = 5 - (listing?.edit_history_count || 0);
+  const editsRemaining = 15 - (listing?.edit_history_count || 0);
 
   return (
     <div>
@@ -144,7 +144,7 @@ export default function EditListing() {
                 </button>
               </div>
             ))}
-            {form.images.length < 15 && (
+            {form.images.length < 5 && (
               <label className="aspect-square rounded-xl glass flex flex-col items-center justify-center cursor-pointer">
                 {uploading
                   ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
@@ -204,3 +204,4 @@ export default function EditListing() {
     </div>
   );
 }
+

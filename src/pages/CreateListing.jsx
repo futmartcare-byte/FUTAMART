@@ -105,8 +105,8 @@ export default function CreateListing() {
       }
     }
     if (!files.length) return;
-    if (form.images.length + files.length > 15) {
-      toast.error("Maximum 15 images");
+    if (form.images.length + files.length > 5) {
+      toast.error("Maximum 5 images");
       return;
     }
     setUploading(true);
@@ -151,7 +151,7 @@ export default function CreateListing() {
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
 
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Photos (3-15 required)</Label>
+          <Label className="text-xs text-muted-foreground">Photos (3-5 required)</Label>
           <div className="grid grid-cols-4 gap-2">
             {form.images.map((url, i) => (
               <div key={i} className="aspect-square rounded-xl overflow-hidden relative group glass">
@@ -162,8 +162,8 @@ export default function CreateListing() {
                 </button>
               </div>
             ))}
-            {form.images.length < 15 && (
-              <FileUploadWithCompress onFile={async (file) => { if (form.images.length >= 15) { toast.error("Maximum 15 images"); return; } setUploading(true); try { const url = await uploadToCloudinary(file, "futmart/listings"); setForm(prev => ({ ...prev, images: [...prev.images, url] })); } catch { toast.error("Upload failed"); } finally { setUploading(false); } }} accept="image/*" multiple={false}><div className="aspect-square rounded-xl glass flex flex-col items-center justify-center cursor-pointer hover:brightness-110">{uploading ? <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" /> : <><Camera className="w-5 h-5 text-muted-foreground" /><span className="text-[10px] text-muted-foreground mt-1">Add</span></>}</div></FileUploadWithCompress>
+            {form.images.length < 5 && (
+              <FileUploadWithCompress onFile={async (file) => { if (form.images.length >= 5) { toast.error("Maximum 5 images"); return; } setUploading(true); try { const url = await uploadToCloudinary(file, "futmart/listings"); setForm(prev => ({ ...prev, images: [...prev.images, url] })); } catch { toast.error("Upload failed"); } finally { setUploading(false); } }} accept="image/*" multiple={false}><div className="aspect-square rounded-xl glass flex flex-col items-center justify-center cursor-pointer hover:brightness-110">{uploading ? <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" /> : <><Camera className="w-5 h-5 text-muted-foreground" /><span className="text-[10px] text-muted-foreground mt-1">Add</span></>}</div></FileUploadWithCompress>
             )}
           </div>
           {uploading && (
@@ -234,6 +234,7 @@ export default function CreateListing() {
     </div>
   );
 }
+
 
 
 
