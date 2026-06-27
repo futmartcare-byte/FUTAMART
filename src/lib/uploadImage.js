@@ -17,7 +17,6 @@ export async function uploadToCloudinary(file, folder = "futmart/listings") {
   } else if (folder.includes("notifications")) {
     account = NOTIF_ACCOUNT;
   } else {
-    // Listings alternate between account 1 and 3
     account = LISTING_ACCOUNTS[Math.floor(Date.now() / 1000) % 2];
   }
 
@@ -27,7 +26,7 @@ export async function uploadToCloudinary(file, folder = "futmart/listings") {
   formData.append("folder", folder);
 
   const res = await fetch(
-    https://api.cloudinary.com/v1_1//auto/upload,
+    `https://api.cloudinary.com/v1_1/${account.cloudName}/auto/upload`,
     { method: "POST", body: formData }
   );
   if (!res.ok) throw new Error("Upload failed");
