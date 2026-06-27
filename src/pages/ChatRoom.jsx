@@ -126,6 +126,7 @@ export default function ChatRoom() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState(null);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [sendingVoice, setSendingVoice] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingMsgId, setPlayingMsgId] = useState(null);
   const [playingProgress, setPlayingProgress] = useState(0);
@@ -347,7 +348,8 @@ export default function ChatRoom() {
   };
 
   const previewAudio = () => {
-    if (!recordedBlob) return;
+    if (!recordedBlob || sendingVoice) return;
+    setSendingVoice(true);
     if (isPlaying) { audioPlayerRef.current?.pause(); setIsPlaying(false); return; }
     const audio = new Audio(URL.createObjectURL(recordedBlob));
     audioPlayerRef.current = audio;
@@ -357,7 +359,8 @@ export default function ChatRoom() {
   };
 
   const sendVoice = async () => {
-    if (!recordedBlob) return;
+    if (!recordedBlob || sendingVoice) return;
+    setSendingVoice(true);
     try {
       const url = await uploadToCloudinary(new File([recordedBlob], "voice.webm", { type: "audio/webm" }));
       sendMessage.mutate({ attachment_url: url, attachment_type: "voice_note", voice_duration: recordingTime });
@@ -562,7 +565,7 @@ export default function ChatRoom() {
             <GlassButton variant="ghost" size="sm" onClick={discardVoice} className="h-9 w-9 p-0 text-destructive">
               <Trash2 className="w-4 h-4" />
             </GlassButton>
-            <GlassButton variant="orange" size="sm" onClick={sendVoice} className="h-9 w-9 p-0">
+            <GlassButton variant="orange" size="sm" onClick={sendVoice} disabled={sendingVoice} className="h-9 w-9 p-0 disabled:opacity-50">
               <Send className="w-4 h-4" />
             </GlassButton>
           </div>
@@ -609,6 +612,11 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
+
+
+
 
 
 
