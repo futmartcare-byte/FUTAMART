@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
@@ -198,7 +198,7 @@ export default function ChatList() {
                     </div>
                     <div className="flex items-center justify-between gap-2 mt-0.5">
                       <p className={`text-[13px] truncate ${hasUnread ? "text-foreground/80 font-medium" : "text-muted-foreground"}`}>
-                        {isSupport ? (chat.last_message || "Tap to chat with support") : (chat.last_message || chat.listing_title)}
+                        {isSupport ? (chat.last_message || "Tap to chat with support") : (chat.last_message === "voice_note" || chat.last_message?.includes("blob:") ? "Voice note" : chat.last_message?.includes("http") && !chat.last_message?.includes(" ") ? "Image" : (chat.last_message || chat.listing_title))}
                       </p>
                       {hasUnread && (
                         <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-[11px] font-bold text-white flex items-center justify-center shadow-sm shadow-orange-500/30">
@@ -216,3 +216,4 @@ export default function ChatList() {
     </div>
   );
 }
+

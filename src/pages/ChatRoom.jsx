@@ -9,7 +9,7 @@ import TypingIndicator from "@/components/chat/TypingIndicator";
 import ProBadge from "@/components/ProBadge";
 import { Input } from "@/components/ui/input";
 import {
-  ArrowLeft, Send, Mic, MicOff, Paperclip, Play, Pause,
+  ArrowLeft, Send, Mic, MicOff, Play, Pause,
   Trash2, Check, CheckCheck, Image as ImageIcon, X,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay, formatDistanceToNow } from "date-fns";
@@ -601,6 +601,9 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
+
 
 
 
