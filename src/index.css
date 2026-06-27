@@ -7,17 +7,9 @@
 @tailwind utilities;
 html {
   overscroll-behavior-y: none;
-  height: 100%;
-  overflow: hidden;
 }
 body {
   overscroll-behavior-y: none;
-  height: 100%;
-  overflow: hidden;
-}
-#root {
-  height: 100%;
-  overflow: hidden;
 }
 @layer base {
   :root, html {
@@ -296,4 +288,5 @@ img.allow-interaction {
   animation: marquee 14s linear infinite;
   padding-left: 100%;
 }
+
 

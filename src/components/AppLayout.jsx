@@ -16,13 +16,13 @@ export default function AppLayout() {
   const isHome = location.pathname === "/";
 
   const content = (
-    <main className={(hideNav ? "" : "pb-20") + " flex-1 overflow-y-auto"}>
+    <main className={hideNav ? "" : "pb-20"}>
       <Outlet />
     </main>
   );
 
   return (
-    <div className="h-[100dvh] flex flex-col max-w-lg mx-auto" style={{ background: "transparent" }}>
+    <div className="min-h-screen max-w-lg mx-auto" style={{ background: "transparent" }}>
       <PresenceWrapper />
       {isHome ? <PullToRefresh>{content}</PullToRefresh> : content}
       {!hideNav && <BottomNav />}
@@ -31,4 +31,5 @@ export default function AppLayout() {
     </div>
   );
 }
+
 
