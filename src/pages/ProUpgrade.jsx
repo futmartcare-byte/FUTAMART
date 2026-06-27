@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import GlassCard from "@/components/GlassCard";
 import GlassButton from "@/components/GlassButton";
+import { supabase } from "@/api/supabaseClient";
+import { useAuth } from "@/lib/AuthContext";
+import { toast } from "sonner";
 import ProCrown from "@/components/ProCrown";
 import { ArrowLeft, Check, Star, Shield, Zap, BadgeCheck, Headphones } from "lucide-react";
 
@@ -13,6 +16,7 @@ const FEATURES = [
 ];
 
 export default function ProUpgrade() {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -81,4 +85,7 @@ export default function ProUpgrade() {
     </div>
   );
 }
+
+
+
 
