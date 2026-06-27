@@ -392,12 +392,12 @@ export default function ChatRoom() {
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${playing ? "bg-orange-400/30" : "bg-white/10"}`}>
             {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </div>
-          <span className="text-sm">­ƒÄÖ´©Å Voice note</span>
+          <span className="text-sm">Voice note</span>
         </button>
       );
     }
     if (msg.attachment_type === "document" && msg.attachment_url) {
-      return <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline">­ƒôä View document</a>;
+      return <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline">­View document</a>;
     }
     if (msg.attachment_type === "image" && msg.attachment_url) {
       return <img src={msg.attachment_url} alt="" className="max-w-[200px] rounded-lg cursor-pointer" onClick={() => setLightboxImg(msg.attachment_url)} />;
@@ -473,7 +473,7 @@ export default function ChatRoom() {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-lg mx-auto">
+    <div className="flex flex-col h-[100dvh] max-w-lg mx-auto">
       <div className="glass sticky top-0 z-40 px-3 py-2.5 border-b border-white/5 flex items-center gap-3 shrink-0">
         <button onClick={() => navigate(searchParams.get("from") === "admin" ? "/admin" : "/chats")} className="p-2 -ml-1 shrink-0">
           <ArrowLeft className="w-5 h-5" />
@@ -599,6 +599,9 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
+
 
 
 
