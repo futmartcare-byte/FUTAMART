@@ -17,6 +17,8 @@ import { toast } from "sonner";
 import { sendChatNotification } from "@/lib/firebase";
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUD_NAME_2 = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME_2;
+const UPLOAD_PRESET_2 = "futamart_listings";
 const UPLOAD_PRESET = "futmart_listings";
 const ADMIN_EMAIL = "futmartzite@gmail.com";
 const SUPPORT_USER_ID = "1629c76b-0af3-48b0-bf03-cf73710e6d57";
@@ -24,9 +26,9 @@ const SUPPORT_USER_ID = "1629c76b-0af3-48b0-bf03-cf73710e6d57";
 async function uploadToCloudinary(file, folder = "futmart/chat") {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("upload_preset", UPLOAD_PRESET_2);
   formData.append("folder", folder);
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME_2}/auto/upload`, {
     method: "POST",
     body: formData,
   });
@@ -637,5 +639,9 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
+
+
 
 
