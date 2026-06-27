@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
@@ -23,23 +23,9 @@ import { format, isToday } from "date-fns";
 const ADMIN_EMAIL = "futmartzite@gmail.com";
 const ADMIN_PASSWORD = "2456";
 
-const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-const UPLOAD_PRESET = "futmart_listings";
+import { uploadToCloudinary } from "@/lib/uploadImage";
 
-async function uploadToCloudinary(file, folder) {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", UPLOAD_PRESET);
-  formData.append("folder", folder);
 
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-    { method: "POST", body: formData }
-  );
-  if (!res.ok) throw new Error("Upload failed");
-  const data = await res.json();
-  return data.secure_url;
-}
 
 // ---- Reports Tab ----
 function ReportsTab() {
@@ -87,7 +73,7 @@ function ReportsTab() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{r.target_name}</p>
-              <p className="text-xs text-muted-foreground">{r.target_type === "listing" ? "Listing" : "Seller"} · {r.reason}</p>
+              <p className="text-xs text-muted-foreground">{r.target_type === "listing" ? "Listing" : "Seller"} � {r.reason}</p>
               {r.details && <p className="text-xs text-muted-foreground/60 mt-0.5 truncate">{r.details}</p>}
               <div className="flex items-center gap-2 mt-1.5">
                 {r.target_type === "listing" && (
@@ -427,7 +413,7 @@ function ListingsTab({ listings, profiles, onRemoveListing, onFeatureListing }) 
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{listing.title}</p>
-                <p className="text-xs text-orange-400">â‚¦{listing.price?.toLocaleString()}</p>
+                <p className="text-xs text-orange-400">₦{listing.price?.toLocaleString()}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                     listing.status === "active" ? "bg-green-400/10 text-green-400" :
@@ -643,7 +629,7 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
                 <p className="text-sm font-medium truncate">{n.title}</p>
                 <p className="text-xs text-muted-foreground truncate">{n.message}</p>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">
-                  {n.created_at ? format(new Date(n.created_at), "MMM d, h:mm a") : ""} Â· {n.is_read ? "Read" : "Unread"}
+                  {n.created_at ? format(new Date(n.created_at), "MMM d, h:mm a") : ""} · {n.is_read ? "Read" : "Unread"}
                 </p>
               </div>
               <button onClick={() => deleteNotif.mutate(n.id)} className="p-1 text-muted-foreground hover:text-red-400 shrink-0">
@@ -859,6 +845,7 @@ export default function Admin() {
     </div>
   );
 }
+
 
 
 
