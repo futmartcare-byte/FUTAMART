@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { format, isToday, isYesterday } from "date-fns";
 import { toast } from "sonner";
 
+const ADMIN_EMAIL = "futmartzite@gmail.com";
 const SUPPORT_USER_ID = "1629c76b-0af3-48b0-bf03-cf73710e6d57";
 const SUPPORT_NAME = "FutaMart Support";
 const SUPPORT_AVATAR = "https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/5bd4ffbb9_QjhED.jpg";
@@ -111,7 +112,7 @@ export default function ChatList() {
 
   const filtered = chats.filter((chat) => {
     const isSupportChat = chat.seller_id === SUPPORT_USER_ID || chat.buyer_id === SUPPORT_USER_ID || chat.listing_title === "Customer Support";
-    if (isSupportChat) return false;
+    if (isSupportChat && user?.email !== ADMIN_EMAIL) return false;
     if (!search) return true;
     const other = getOtherParty(chat);
     return other.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -216,4 +217,8 @@ export default function ChatList() {
     </div>
   );
 }
+
+
+
+
 
