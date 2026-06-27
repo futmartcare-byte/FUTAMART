@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-  ArrowLeft, Search, Shield, Crown, UserCheck, Ban, Key, Bell,
+  ArrowLeft, Search, Shield, Crown, UserCheck, Ban, Key, Bell, Lightbulb,
   Send, Users, User, BarChart3, Package, Flag, Settings,
   Trash2, CheckCircle, XCircle, Star, RefreshCw, Image as ImageIcon,
   TrendingUp, MessageSquare, AlertCircle, History, Eye, Headphones, ThumbsUp, ThumbsDown
@@ -911,6 +911,8 @@ export default function Admin() {
     </div>
   );
 }
+
+
 
 
 
