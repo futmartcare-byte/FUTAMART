@@ -264,7 +264,7 @@ export default function ChatRoom() {
       const { error: chatError } = await supabase
         .from("chats")
         .update({
-          last_message: msgData.payload_text || (msgData.attachment_type === "voice_note" ? "­ƒÄÖ´©Å Voice note" : "­ƒôÄ Attachment"),
+          last_message: msgData.attachment_type === "voice_note" ? "Voice note" : msgData.attachment_type === "image" ? "Image" : msgData.attachment_type === "document" ? "Document" : msgData.payload_text || (msgData.attachment_type === "voice_note" ? "­ƒÄÖ´©Å Voice note" : "­ƒôÄ Attachment"),
           last_message_time: new Date().toISOString(),
           ...(isSeller ? { unread_count_buyer: currentUnread + 1 } : { unread_count_seller: currentUnread + 1 }),
         })
@@ -495,7 +495,7 @@ export default function ChatRoom() {
           <PresenceStatus profile={otherProfile} />
           {chat?.listing_title && (
             <Link to={`/listing/${chat.listing_id}`} className="text-[10px] text-orange-400 truncate block mt-0.5">
-              -À {chat.listing_title}
+              {chat.listing_title}
             </Link>
           )}
         </div>
@@ -601,6 +601,8 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
 
 
 
