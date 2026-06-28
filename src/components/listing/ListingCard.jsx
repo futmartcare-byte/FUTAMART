@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Heart, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,7 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
-      { rootMargin: "100px" }
+      { rootMargin: "400px" }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -30,7 +30,7 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
             <img
               src={listing.images?.[0]?.includes("cloudinary.com") ? listing.images[0].replace("/upload/", "/upload/w_400,c_limit,q_80,f_auto/") : listing.images?.[0]}
               alt={listing.title}
-              loading="lazy"
+
               onLoad={() => setImageLoaded(true)}
               className={cn(
                 "w-full h-full object-cover",
@@ -66,7 +66,7 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
             {listing.title}
           </p>
           <p className="text-[12px] font-bold text-orange-500 font-display">
-            ₦{listing.price?.toLocaleString()}
+            ?{listing.price?.toLocaleString()}
           </p>
           <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
             <MapPin className="w-2.5 h-2.5 shrink-0" />
@@ -77,3 +77,4 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
     </div>
   );
 }
+
