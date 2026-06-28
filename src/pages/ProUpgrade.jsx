@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import GlassCard from "@/components/GlassCard";
 import GlassButton from "@/components/GlassButton";
 import { supabase } from "@/api/supabaseClient";
@@ -33,7 +33,7 @@ export default function ProUpgrade() {
           <ProCrown size="lg" />
           <h2 className="text-2xl font-heading font-bold text-foreground">Pro Seller Plan</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Unlock powerful tools to grow your sales on FUTAMART � built exclusively for serious Futarian sellers.
+            Unlock powerful tools to grow your sales on FUTAMART � built exclusively for serious Futarian sellers.
           </p>
           <div className="inline-block glass rounded-full px-5 py-2 mt-2">
             <span className="text-orange-400 font-bold text-lg">Coming Soon</span>
@@ -44,10 +44,10 @@ export default function ProUpgrade() {
         <GlassCard className="p-5 text-center space-y-2">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">Planned Pricing</p>
           <div className="flex items-end justify-center gap-1">
-            <span className="text-3xl font-display font-bold text-foreground">?5,000</span>
+            <span className="text-3xl font-display font-bold text-foreground">₦5,000</span>
             <span className="text-muted-foreground mb-1">/month</span>
           </div>
-          <p className="text-xs text-muted-foreground">or ?50,000/year (save 17%)</p>
+          <p className="text-xs text-muted-foreground">or ₦50,000/year (save 17%)</p>
         </GlassCard>
 
         {/* Features */}
@@ -93,3 +93,4 @@ export default function ProUpgrade() {
     </div>
   );
 }
+
