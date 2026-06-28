@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { sendChatNotification } from "@/lib/firebase";
 import FileUploadWithCompress from "@/components/FileUploadWithCompress";
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -275,9 +276,12 @@ export default function ChatRoom() {
 
       return newMsg;
     },
-    onSuccess: () => {
+    onSuccess: (newMsg) => {
       queryClient.invalidateQueries({ queryKey: ["messages", id] });
       queryClient.invalidateQueries({ queryKey: ["chat", id] });
+      const recipientId = chat.seller_id === user.id ? chat.buyer_id : chat.seller_id;
+      const notifyText = newMsg.attachment_type === "voice_note" ? "Voice note" : newMsg.attachment_type === "image" ? "Image" : newMsg.attachment_type === "document" ? "Document" : (newMsg.payload_text || "New message");
+      sendChatNotification(recipientId, newMsg.sender_name, notifyText, supabase);
     },
     onError: (err) => toast.error(err.message || "Failed to send message"),
   });
@@ -611,6 +615,9 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
+
 
 
 
