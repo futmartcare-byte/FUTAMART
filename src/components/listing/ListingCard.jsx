@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Heart, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -66,7 +66,7 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
             {listing.title}
           </p>
           <p className="text-[12px] font-bold text-orange-500 font-display">
-            ?{listing.price?.toLocaleString()}
+            ₦{listing.price?.toLocaleString()}
           </p>
           <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
             <MapPin className="w-2.5 h-2.5 shrink-0" />
@@ -77,4 +77,5 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
     </div>
   );
 }
+
 
