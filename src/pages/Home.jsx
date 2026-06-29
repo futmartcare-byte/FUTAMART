@@ -39,6 +39,7 @@ function ProSellerCarousel() {
         .select("id, title, price, images, created_by_id, seller_username, carousel_show_count")
         .eq("status", "active")
         .eq("seller_is_pro", true)
+        .eq("is_carousel_pinned", true)
         .order("carousel_show_count", { ascending: true });
 
       if (error || !data || data.length === 0) return;
@@ -410,6 +411,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 
