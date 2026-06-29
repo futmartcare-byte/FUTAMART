@@ -30,6 +30,8 @@ function ProSellerCarousel() {
   const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
   const [done, setDone] = useState(false);
+  const [animKey, setAnimKey] = useState(0);
+  const [showBanner, setShowBanner] = useState(false);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -69,19 +71,21 @@ function ProSellerCarousel() {
     timerRef.current = setInterval(() => {
       setCurrent(prev => {
         if (prev >= slides.length - 1) {
-          setDone(true);
           clearInterval(timerRef.current);
+          setTimeout(() => setShowBanner(true), 500);
+          setDone(true);
           return prev;
         }
+        setAnimKey(k => k + 1);
         return prev + 1;
       });
     }, 5000);
     return () => clearInterval(timerRef.current);
   }, [slides, done]);
 
-  if (done || slides.length === 0) {
+  if (slides.length === 0 || showBanner) {
     return (
-      <div className="px-4 pt-3">
+      <div className="px-4 pt-3" style={{animation: "fadeSlideIn 0.6s ease forwards"}}>
         <div className="rounded-2xl overflow-hidden">
           <img
             src="https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/4f8c8752a_THEFEDERALUNIVERSITYOFTECHNOLOGYAKURE1.png"
@@ -411,6 +415,10 @@ export default function Home() {
     </div>
   );
 }
+
+
+
+
 
 
 
