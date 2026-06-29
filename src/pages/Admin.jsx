@@ -471,7 +471,7 @@ function ListingsTab({ listings, profiles, onRemoveListing, onFeatureListing }) 
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{listing.title}</p>
-                <p className="text-xs text-orange-400">â‚¦{listing.price?.toLocaleString()}</p>
+                <p className="text-xs text-orange-400">₦{listing.price?.toLocaleString()}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                     listing.status === "active" ? "bg-green-400/10 text-green-400" :
