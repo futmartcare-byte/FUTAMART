@@ -973,7 +973,7 @@ export default function Admin() {
 
       <Tabs defaultValue="dashboard" className="w-full">
         <div className="overflow-x-auto no-scrollbar">
-          <TabsList className="glass w-max min-w-full grid grid-cols-8 h-10 rounded-none border-b border-white/5">
+          <TabsList className="glass flex h-10 rounded-none border-b border-white/5 w-max">
             <TabsTrigger value="dashboard" className="text-[10px] flex items-center gap-1"><BarChart3 className="w-3 h-3" />Stats</TabsTrigger>
             <TabsTrigger value="users" className="text-[10px] flex items-center gap-1"><Users className="w-3 h-3" />Users</TabsTrigger>
             <TabsTrigger value="listings" className="text-[10px] flex items-center gap-1"><Package className="w-3 h-3" />Listings</TabsTrigger>
