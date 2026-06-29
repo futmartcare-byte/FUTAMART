@@ -127,7 +127,7 @@ function ProSellerCarousel() {
             <p className="text-white text-sm font-semibold truncate mb-1">{slide.title}</p>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-white text-[11px] font-bold shrink-0">
                   {slide.seller_username?.[0]?.toUpperCase()}
                 </div>
                 <span className="text-white/80 text-[11px] font-medium">{slide.seller_username}</span>
