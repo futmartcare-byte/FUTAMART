@@ -148,6 +148,33 @@ function ProSellerCarousel() {
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // Pull-to-refresh
+  useEffect(() => {
+    let startY = 0;
+    let pulling = false;
+    const onTouchStart = (e) => {
+      if (window.scrollY === 0) {
+        startY = e.touches[0].clientY;
+        pulling = true;
+      }
+    };
+    const onTouchEnd = (e) => {
+      if (pulling) {
+        const diff = e.changedTouches[0].clientY - startY;
+        if (diff > 80) {
+          window.location.reload(true);
+        }
+      }
+      pulling = false;
+    };
+    window.addEventListener("touchstart", onTouchStart);
+    window.addEventListener("touchend", onTouchEnd);
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
   const { data: profile, isLoading: profileLoading } = useProfile();
   const [activeCategory, setActiveCategory] = useState("all");
   const [listings, setListings] = useState([]);
