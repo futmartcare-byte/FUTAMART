@@ -1,0 +1,193 @@
+[33m6485db4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m add cache busting to vite config
+[33m4b6fde9[m restore carousel UI updates
+[33m4bbdb3c[m Revert "carousel animations and sponsored UI"
+[33md67b4fc[m carousel animations and sponsored UI
+[33m0b8ff22[m v1.3.0 carousel animations and sponsored UI
+[33m556ad92[m force no cache on refresh
+[33me703e9c[m fix carousel pinned filter
+[33m5acc9e0[m pro sellers update
+[33mf72cb89[m Bump SW cache v38 to force Naira fix to deploy
+[33m3041a5d[m Fix corrupted Naira symbol in ProUpgrade pricing
+[33mde92038[m Wire up sendChatNotification so push notifications fire on new messages, bump SW v37
+[33me428af9[m Fix ProUpgrade waitlist insert, restore closing tags, bump SW cache v36
+[33m3fd61a0[m Revert admin tabs to grid layout
+[33m0952bfb[m Make admin tabs scrollable horizontally
+[33m36b1845[m Fix corrupted sw.js - set v35
+[33m9c9ab4b[m Bump SW cache - force update for image picker fix
+[33m67fb719[m Fix multi-image upload - remove blocking lock between files
+[33m7ac4fa5[m Fix duplicate multiple prop in CreateListing image picker
+[33m24b1488[m your message
+[33mbecaefa[m Fix corrupted Naira symbol in ListingCard
+[33me7a8ddc[m Fix corrupted sw.js cache name
+[33m5d78d59[m Fix listing images not loading - increase rootMargin and remove double lazy
+[33m1ee804f[m Add Suggestions tab to Notifications page
+[33m9f0df2d[m Fix typo in compress popup + bump SW
+[33m387762c[m Allow multiple image selection in CreateListing
+[33m8649fd2[m Fix previewAudio guard, sendVoice duplicate protection
+[33m03e77e1[m Fix previewAudio guard, sendVoice duplicate protection
+[33m8838cc9[m Fix duplicate voice note send with sendingVoice guard + disable button
+[33m01d4666[m Fix duplicate voice note send with sendingVoice guard + disable button
+[33m2b7a7ce[m Waveform voice note UI, 1min cap, listing validation toasts + bump SW cache
+[33m4983a85[m Style 900KB warning as centered red alert popup
+[33m1c156cd[m Bump SW cache v30
+[33m0ce9058[m Reduce image upload limit to 5, restore edit-history limit to 15
+[33m66cb2ef[m Bump SW cache v29
+[33mcb6921c[m Bump SW cache v28
+[33mff62238[m Fix AppLayout to use scrollable main instead of relying on body scroll
+[33m5b4989a[m Bump SW cache v27
+[33mb2b734e[m Lock html/body/root scroll to fix mobile address bar shake in chat
+[33m1fe7151[m Fix voice note max to 1 min + bump SW v26
+[33m54e34c7[m Fix voice note max to 1 min + bump SW v26
+[33m51525ff[m Add image uploader back, fix searchParams, fix chat list text + bump SW v24
+[33m5416436[m Fix duplicate imports in ChatRoom + bump SW v23
+[33m78f4ac7[m Fix missing useSearchParams and FileUploadWithCompress imports in ChatRoom + bump SW v22
+[33m279d47c[m Admin sees support chats in chat list, regular users dont + bump SW v21
+[33m6513b25[m Remove Paperclip doc attacher + bump SW v20
+[33m6069a7c[m Fix back button navigation for regular users
+[33m301902a[m Fix doc attacher removed, WhatsApp voice note UI, image multi-upload, back button, chat list
+[33m5857873[m Fix chat header, voice note list display + bump SW v18
+[33m95f0522[m Hide Customer Support label from regular chats header
+[33m633c811[m Voice note: 1min limit, show duration, progress bar + bump SW cache v17
+[33m8e4fed7[m Voice note: 1min limit, show duration, progress bar
+[33m14b68fe[m Bump SW cache to v16 - force fresh voice note fix
+[33mdf6e48c[m Fix chat layout shake on mobile - use dvh instead of vh
+[33m0da2e00[m Fix back button in ChatRoom to return to admin when spectating
+[33m09aad70[m Bump SW cache to v15
+[33m6d34865[m Fix Lightbulb import in Admin panel
+[33m9660c28[m Fix Lightbulb import in Admin
+[33mf810c85[m Bump SW cache to v14 to force fresh ChatRoom fix
+[33m4dccfbf[m Remove duplicate uploadToCloudinary import from ChatRoom
+[33m5dee9db[m Fix ChatRoom missing imports - restore useParams and other hooks
+[33mb2f9b94[m Fix duplicate useState import in SavedAds
+[33mf97299f[m Fix duplicate useState import in SavedAds
+[33md07950b[m Add Suggestions page, route, Settings button, and Admin tab
+[33me9a46fa[m Wire compress slider into ProfileEdit avatar, fix admin grid cols, bump SW cache
+[33mf59705d[m Add For You suggestions tab to SavedAds with swipe support
+[33me8bacb9[m Fix FileUploadWithCompress template literal syntax error
+[33m80d32c1[m Add slider compress UI (800KB-1GB) wired into CreateListing and ChatRoom
+[33m74a85d3[m Add 1MB file size limit and compress button across all uploads
+[33maa7a671[m Add useEffect import to Admin for WaitlistTab
+[33m1250f23[m Bump SW cache to v11 to show waitlist tab in admin
+[33mddc567e[m Add waitlist tab to admin panel
+[33mec689b2[m Fix ProUpgrade imports and add Eye icon properly
+[33m98c7441[m Add 100% listing visibility as pro feature
+[33m957060e[m Pro listings 100% visibility, regular 70%, waitlist sends to Supabase
+[33ma052522[m ChatRoom and Admin now use shared uploadImage utility
+[33mb4ff177[m Fix uploadImage.js URL syntax error
+[33m327e9a3[m Update pro listings limit to 30 across app
+[33mf89e905[m Limit listings to 10 for regular users and 30 for pro sellers
+[33m254c37c[m Split Cloudinary - listings alternate acc1 and acc3, chat acc2, avatars acc1, notifs acc3
+[33m242cbae[m Fix missing closing brace on img tag
+[33m97175d7[m Fix flex div structure in notification cards
+[33mb5c6bfd[m Fix GlassCard JSX structure in sent notifications
+[33mfa10fe2[m Add like/dislike reaction counts to admin sent notifications
+[33m09b89c7[m Spectate mode: view as user, hide input, no read receipts
+[33m946e130[m Fix duplicate searchParams declaration
+[33m80b5019[m Spectate mode colors
+[33m0e48afb[m Spectate mode colors + Bump SW to v22
+[33m8f8a046[m Add spectate mode - seller orange right, buyer glass left
+[33ma919842[m Fix spectate modal height and bottom padding
+[33m6802509[m Fix spectate modal + Bump SW to v21
+[33meaf425a[m Bump SW to v20
+[33mdbfd90f[m Fix spectate modal JSX placement in UsersTab
+[33m7588b5e[m Fix spectate modal render
+[33m17f8a10[m Bump SW to v19
+[33me6f0d6d[m Bump SW to v18
+[33mef293eb[m Add chat spectate feature to admin users tab
+[33m51e3676[m Notify reported user when their listing or profile is reported
+[33m4a899e2[m Replace Settings tab with Reports tab in admin panel
+[33ma4397a1[m Bump SW to v17
+[33m3d7ff24[m Add ReportPage2, wire report links to /report2
+[33m6886a53[m Bump SW to v16
+[33m1c47ab2[m Fix support chat creation, handle existing chats properly
+[33m3d2e863[m Fix support chat creation - use dummy listing_id instead of null
+[33mb491579[m Bump SW to v15 force fresh reload
+[33maafdfe5[m Fix hook order in SupportTab, move early return after all hooks
+[33m38aacd0[m Fix React.useState error in SupportTab password gate
+[33ma1815db[m Add password gate to Support inbox, fix RLS for admin support reads
+[33mfe22515[m Fix listing image viewer tap, redesign safety tip as scrolling marquee banner
+[33ma6e348a[m Fix admin support identity, remove document attacher, fix chat image viewer
+[33m3b91943[m Bump SW to v14 to force fresh CSS and asset reload
+[33m6d7e092[m Hide support chat from Chats list, keep Support button as entry point
+[33m5903824[m Add like/dislike reaction to notifications
+[33m0cab062[m Raise chatbot button higher above nav bar
+[33md882163[m SW v13: cache-first navigation, always fallback to offline page
+[33m54ab5d3[m Bump SW to v12 to cache offline page
+[33m87d895d[m Fix ListingCard: clean file, compact 3-col layout
+[33m19430e2[m Change home grid to 3 columns
+[33m5265990[m Offline page: show no-internet screen first, game is optional
+[33mc462bd9[m Add offline game page and wire to service worker
+[33mc5c41eb[m Shuffle listings on each load/refresh like Jiji
+[33m64366b9[m Pull-to-refresh: frosted glass circle, no orange bg, reload on refresh
+[33md171d86[m Use c_limit for image compression - no crop no stretch
+[33m178cdfb[m Revert image transform - back to original images
+[33m25e84d1[m Remove h_400 from image transform, width-only resize
+[33m881018c[m Fix Naira symbol and remove crop from image transform
+[33m9717f56[m Compress home page thumbnails only: w400, q70, auto format
+[33me67e1f3[m Compress listing images via Cloudinary q60 and auto format
+[33m1a5f977[m Optimize listing thumbnails via Cloudinary transforms (400x400, q70)
+[33mea5a576[m Fix SW: network-first for HTML so users always get latest update
+[33mab835d8[m Add customer support chat: Support button in ChatList, Support inbox in Admin
+[33mf4a4dc1[m Auto silent update on SW change, remove update banner
+[33m67790a6[m Rebuild pull-to-refresh: fix scroll detection, home-only, floating circle
+[33mf3fa1d6[m Lower AI chatbot button position
+[33m884e7aa[m Remove leftover ellipsis from lucide-react import
+[33m1792751[m Improve pull-to-refresh to use floating spinner instead of pushing content
+[33m8f08d4c[m Fix duplicate LogOut import in lucide-react block
+[33m0bc9b4b[m Add notification error logging
+[33mf0bfc31[m Fix broken imports in Settings
+[33ma9aa130[m Add logout button to settings
+[33m4f4b1ce[m Fix presence speed, read receipts, inactive timeout
+[33m7f1085a[m Bump SW cache to v9 to force fresh CSS for pull-to-refresh fix
+[33mdef3353[m Update splash screen background color
+[33ma1f44c9[m Test update flow - bump cache version
+[33m7a4a93d[m Add custom orange pull-to-refresh, fix manifest for standalone app identity
+[33me56f0d8[m Make online status update instantly via realtime instead of polling
+[33m7856bfe[m Add proper sent-delivered-read tick states like WhatsApp
+[33mde0a408[m Add real-time listener to chat badge in BottomNav
+[33me2d4d45[m Fix chat badge on nav and improve online presence detection
+[33mdb4f1d8[m Fix duplicate and weblink in notification
+[33m22a40da[m Fix duplicate notifications - single service worker
+[33m8609574[m Fix duplicate notifications - merge sw.js with firebase sw
+[33m0c4623a[m Let Firebase handle notification display automatically
+[33m47d6253[m Fix duplicate notifications
+[33mfd82a5a[m Remove debug notification log
+[33me18f41e[m Use djwt library for JWT signing
+[33m47ad8d5[m Fix private key wrapping from raw base64 secret
+[33mdc2622a[m Fix base64 decode private key newlines
+[33m73f185f[m Use env secret for private key
+[33m0079be2[m Add debug log for notification
+[33mfe6ee9d[m Add CORS headers to edge function
+[33mf53cbc6[m Fix firebase.js use fetch directly
+[33mb11a8b7[m Fix sendChatNotification receiver id
+[33m4d3ac6f[m Add firebase-messaging-sw.js for FCM
+[33ma04bda5[m Fix App.jsx remove style tag use inline animation
+[33m16d4952[m Fix App.jsx backtick syntax error
+[33mcfc8747[m Fix App.jsx style backtick syntax error
+[33mfff5951[m Add Firebase push notifications for chat messages
+[33m6153b11[m Bump SW to v4
+[33m39bf335[m Revert SW back to v3
+[33mb22006f[m Bump SW to v4
+[33m24e2f37[m Revert SW back to v3
+[33mfb23faf[m Bump SW v4 to test update banner
+[33maef449e[m Bump SW v3 to force update banner
+[33m2247ca7[m Fix update banner and AIChatBot, bump SW v2
+[33m42f8667[m Reset SW cache to v1
+[33mec7c573[m Fix update banner in standalone mode, bump SW v3
+[33m3951733[m Add SW update detection to main.jsx
+[33mdf7f54d[m Bump SW cache version to test update banner
+[33mf7604ea[m Launch FUTAMART
+[33mf244398[m Launch FUTAMART
+[33m73ffee8[m Fix PWA icon purpose to remove Chrome fallback
+[33m3ec64e8[m Restore AIChatBot
+[33ma624c8b[m Fix AIChatBot anchor tags via script
+[33m51c49ec[m Fix AIChatBot broken anchor tags
+[33m4936cee[m Fix AIChatBot broken anchor tags
+[33m8b0031b[m Add service worker, manifest, and update handling for PWA install
+[33m8956f61[m Add Open Graph tags for link previews
+[33m36785af[m Convert Settings to Supabase, remove dead base44 code
+[33m71b56bf[m Fix avatar display in chat header
+[33mbeb2cd0[m Fix router basename for Cloudflare
+[33m5be933b[m Fix base path for Cloudflare
+[33m9731f0d[m Add SPA redirect
+[33m5051a58[m Initial commit - FUTAMART
