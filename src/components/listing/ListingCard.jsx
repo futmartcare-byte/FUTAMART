@@ -51,11 +51,11 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
           <button
             onClick={(e) => { e.preventDefault(); onToggleSave?.(listing.id); }}
             className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-sm"
-            style={{ background: isSaved ? "rgba(16,185,129,0.9)" : "rgba(255,255,255,0.9)" }}
+            style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}
           >
             {isSaved
-              ? <Check className="w-3.5 h-3.5 text-white" />
-              : <Heart className="w-3.5 h-3.5 text-gray-600" />
+              ? <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
+              : <Heart className="w-3.5 h-3.5 text-gray-400" />
             }
           </button>
         </div>
