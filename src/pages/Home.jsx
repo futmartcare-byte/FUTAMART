@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+﻿import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
@@ -25,6 +25,113 @@ const CATEGORIES = [
 
 const GLASS_AMBER = "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(251,191,36,0.05))";
 
+
+function ProSellerCarousel() {
+  const [slides, setSlides] = useState([]);
+  const [current, setCurrent] = useState(0);
+  const [done, setDone] = useState(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    async function loadCarousel() {
+      const { data, error } = await supabase
+        .from("listings")
+        .select("id, title, price, images, created_by_id, seller_username, carousel_show_count")
+        .eq("status", "active")
+        .eq("seller_is_pro", true)
+        .order("carousel_show_count", { ascending: true });
+
+      if (error || !data || data.length === 0) return;
+
+      const bySeller = {};
+      for (const listing of data) {
+        if (!bySeller[listing.created_by_id]) bySeller[listing.created_by_id] = [];
+        if (bySeller[listing.created_by_id].length < 5) {
+          bySeller[listing.created_by_id].push(listing);
+        }
+      }
+
+      let pool = Object.values(bySeller).map(arr => arr[0]);
+      pool = pool.sort(() => Math.random() - 0.5);
+      const chosen = pool.slice(0, 20);
+      setSlides(chosen);
+
+      for (const l of chosen) {
+        await supabase.rpc("increment_carousel_count", { listing_id: l.id });
+      }
+    }
+    loadCarousel();
+  }, []);
+
+  useEffect(() => {
+    if (slides.length === 0 || done) return;
+    timerRef.current = setInterval(() => {
+      setCurrent(prev => {
+        if (prev >= slides.length - 1) {
+          setDone(true);
+          clearInterval(timerRef.current);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 5000);
+    return () => clearInterval(timerRef.current);
+  }, [slides, done]);
+
+  if (done || slides.length === 0) {
+    return (
+      <div className="px-4 pt-3">
+        <div className="rounded-2xl overflow-hidden">
+          <img
+            src="https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/4f8c8752a_THEFEDERALUNIVERSITYOFTECHNOLOGYAKURE1.png"
+            alt="Futarians New Marketplace"
+            className="w-full object-cover rounded-sm"
+            style={{ maxHeight: 180 }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const slide = slides[current];
+
+  return (
+    <div className="px-4 pt-3">
+      <Link to={`/listing/${slide.id}`}>
+        <div className="rounded-2xl overflow-hidden relative" style={{ maxHeight: 180 }}>
+          {slide.images?.[0] ? (
+            <img
+              src={slide.images[0]}
+              alt={slide.title}
+              className="w-full object-cover rounded-2xl transition-all duration-500"
+              style={{ maxHeight: 180, minHeight: 140 }}
+            />
+          ) : (
+            <div className="w-full bg-card rounded-2xl flex items-center justify-center" style={{ height: 160 }}>
+              <span className="text-muted-foreground text-xs">No image</span>
+            </div>
+          )}
+          <div className="absolute bottom-0 left-0 right-0 px-3 py-2 rounded-b-2xl"
+            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)" }}>
+            <p className="text-white text-sm font-semibold truncate">{slide.title}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-orange-300 text-xs font-bold">&#8358;{slide.price?.toLocaleString()}</p>
+              <span className="text-[10px] text-white/70">@{slide.seller_username}</span>
+            </div>
+          </div>
+          <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            PRO
+          </div>
+          <div className="absolute top-2 right-2 flex gap-1">
+            {slides.map((_, i) => (
+              <div key={i} className={`rounded-full transition-all ${i === current ? "w-4 h-1.5 bg-orange-400" : "w-1.5 h-1.5 bg-white/40"}`} />
+            ))}
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+}
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -209,17 +316,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hero Banner */}
-      <div className="px-4 pt-3">
-        <div className="rounded-2xl overflow-hidden">
-          <img
-            src="https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/4f8c8752a_THEFEDERALUNIVERSITYOFTECHNOLOGYAKURE1.png"
-            alt="Futarians New Marketplace"
-            className="w-full object-cover rounded-sm"
-            style={{ maxHeight: 180 }}
-          />
-        </div>
-      </div>
+      {/* Pro Seller Carousel */}
+      <ProSellerCarousel />
 
       {/* Guest banner */}
       {!isAuthenticated && (
@@ -312,6 +410,8 @@ export default function Home() {
     </div>
   );
 }
+
+
 
 
 

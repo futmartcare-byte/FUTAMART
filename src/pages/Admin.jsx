@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
@@ -9,10 +9,10 @@ import ProCrown from "@/components/ProCrown";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
+import { Star,
   ArrowLeft, Search, Shield, Crown, UserCheck, Ban, Key, Bell, Lightbulb,
   Send, Users, User, BarChart3, Package, Flag, Settings,
-  Trash2, CheckCircle, XCircle, Star, RefreshCw, Image as ImageIcon,
+  Trash2, CheckCircle, XCircle, RefreshCw, Image as ImageIcon,
   TrendingUp, MessageSquare, AlertCircle, History, Eye, Headphones, ThumbsUp, ThumbsDown
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -50,7 +50,7 @@ function SuggestionsTab() {
             <span className="text-[10px] text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</span>
           </div>
           <p className="text-sm text-foreground">{s.message}</p>
-          <p className="text-[10px] text-muted-foreground">� {s.username}</p>
+          <p className="text-[10px] text-muted-foreground">— {s.username}</p>
         </div>
       ))}
     </div>
@@ -131,7 +131,7 @@ function ReportsTab() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{r.target_name}</p>
-              <p className="text-xs text-muted-foreground">{r.target_type === "listing" ? "Listing" : "Seller"} � {r.reason}</p>
+              <p className="text-xs text-muted-foreground">{r.target_type === "listing" ? "Listing" : "Seller"} · {r.reason}</p>
               {r.details && <p className="text-xs text-muted-foreground/60 mt-0.5 truncate">{r.details}</p>}
               <div className="flex items-center gap-2 mt-1.5">
                 {r.target_type === "listing" && (
@@ -471,7 +471,7 @@ function ListingsTab({ listings, profiles, onRemoveListing, onFeatureListing }) 
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{listing.title}</p>
-                <p className="text-xs text-orange-400">₦{listing.price?.toLocaleString()}</p>
+                <p className="text-xs text-orange-400">â‚¦{listing.price?.toLocaleString()}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                     listing.status === "active" ? "bg-green-400/10 text-green-400" :
@@ -687,7 +687,7 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
                 <p className="text-sm font-medium truncate">{n.title}</p>
                 <p className="text-xs text-muted-foreground truncate">{n.message}</p>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">
-                  {n.created_at ? format(new Date(n.created_at), "MMM d, h:mm a") : ""} · {n.is_read ? "Read" : "Unread"}
+                  {n.created_at ? format(new Date(n.created_at), "MMM d, h:mm a") : ""} Â· {n.is_read ? "Read" : "Unread"}
                 </p>
               </div>
               <button onClick={() => deleteNotif.mutate(n.id)} className="p-1 text-muted-foreground hover:text-red-400 shrink-0">
@@ -704,6 +704,146 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
 }
 
 // ---- Main Admin ----
+
+function ProSellersTab() {
+  const [proSellers, setProSellers] = useState([]);
+  const [selectedSeller, setSelectedSeller] = useState(null);
+  const [sellerListings, setSellerListings] = useState([]);
+  const [carouselSlots, setCarouselSlots] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url, is_pro_seller")
+        .eq("is_pro_seller", true);
+      setProSellers(data || []);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  useEffect(() => {
+    async function loadSlots() {
+      const { data } = await supabase
+        .from("listings")
+        .select("id, title, price, images, seller_username, carousel_show_count, is_carousel_pinned, status, created_by_id, seller_is_pro")
+        .eq("seller_is_pro", true)
+        .eq("status", "active")
+        .eq("is_carousel_pinned", true)
+        .order("carousel_show_count", { ascending: true })
+        .limit(20);
+      setCarouselSlots(data || []);
+    }
+    loadSlots();
+  }, []);
+
+  async function loadSellerListings(seller) {
+    setSelectedSeller(seller);
+    const { data } = await supabase
+      .from("listings")
+      .select("id, title, price, images, status, carousel_show_count, is_carousel_pinned")
+      .eq("created_by_id", seller.id)
+      .eq("status", "active")
+      .order("created_at", { ascending: false });
+    setSellerListings(data || []);
+  }
+
+  async function togglePin(listing) {
+    const newVal = !listing.is_carousel_pinned;
+    const pinned = carouselSlots.filter(l => l.id !== listing.id && l.is_carousel_pinned);
+    if (newVal && pinned.length >= 20) {
+      toast.error("Carousel is full — remove a listing first (max 20)");
+      return;
+    }
+    await supabase.from("listings").update({ is_carousel_pinned: newVal }).eq("id", listing.id);
+    setSellerListings(prev => prev.map(l => l.id === listing.id ? { ...l, is_carousel_pinned: newVal } : l));
+    setCarouselSlots(prev => {
+      if (newVal) return [...prev, { ...listing, is_carousel_pinned: true }];
+      return prev.filter(l => l.id !== listing.id);
+    });
+    toast.success(newVal ? "Added to carousel" : "Removed from carousel");
+  }
+
+  async function removeFromCarousel(listing) {
+    await supabase.from("listings").update({ is_carousel_pinned: false }).eq("id", listing.id);
+    setCarouselSlots(prev => prev.filter(l => l.id !== listing.id));
+    setSellerListings(prev => prev.map(l => l.id === listing.id ? { ...l, is_carousel_pinned: false } : l));
+    toast.success("Removed from carousel");
+  }
+
+  if (loading) return <div className="p-6 text-center text-muted-foreground text-sm">Loading...</div>;
+
+  return (
+    <div className="p-4 space-y-4">
+      <h2 className="text-sm font-bold text-orange-400">Carousel Slots ({carouselSlots.length}/20)</h2>
+
+      {carouselSlots.length > 0 && (
+        <div className="space-y-2">
+          {carouselSlots.map((l, i) => (
+            <GlassCard key={l.id} className="flex items-center gap-3 p-2">
+              <span className="text-xs text-muted-foreground w-5">{i + 1}</span>
+              {l.images?.[0] && <img src={l.images[0]} className="w-10 h-10 rounded-lg object-cover" />}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold truncate">{l.title}</p>
+                <p className="text-[10px] text-muted-foreground">@{l.seller_username} · shown {l.carousel_show_count}x</p>
+              </div>
+              <GlassButton variant="ghost" className="text-[10px] px-2 py-1 text-red-400" onClick={() => removeFromCarousel(l)}>Remove</GlassButton>
+            </GlassCard>
+          ))}
+        </div>
+      )}
+
+      {carouselSlots.length === 0 && (
+        <p className="text-xs text-muted-foreground text-center py-4">No listings pinned to carousel yet. Pin listings from pro sellers below.</p>
+      )}
+
+      <h2 className="text-sm font-bold text-orange-400 pt-2">Pro Sellers</h2>
+      <div className="space-y-2">
+        {proSellers.map(seller => (
+          <GlassCard key={seller.id} className="p-3">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => loadSellerListings(seller)}>
+              {seller.avatar_url
+                ? <img src={seller.avatar_url} className="w-8 h-8 rounded-full object-cover" />
+                : <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 text-xs font-bold">{seller.username?.[0]}</div>
+              }
+              <div className="flex-1">
+                <p className="text-xs font-semibold">@{seller.username}</p>
+                <p className="text-[10px] text-muted-foreground">Tap to view listings</p>
+              </div>
+              <span className="text-orange-400 text-[10px]">▼</span>
+            </div>
+
+            {selectedSeller?.id === seller.id && (
+              <div className="mt-3 space-y-2">
+                {sellerListings.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-2">No active listings</p>
+                )}
+                {sellerListings.map(listing => (
+                  <div key={listing.id} className="flex items-center gap-2 p-2 rounded-xl glass">
+                    {listing.images?.[0] && <img src={listing.images[0]} className="w-9 h-9 rounded-lg object-cover" />}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold truncate">{listing.title}</p>
+                      <p className="text-[10px] text-muted-foreground">₦{listing.price?.toLocaleString()} · shown {listing.carousel_show_count}x</p>
+                    </div>
+                    <GlassButton
+                      variant={listing.is_carousel_pinned ? "orange" : "ghost"}
+                      className="text-[10px] px-2 py-1 shrink-0"
+                      onClick={() => togglePin(listing)}
+                    >
+                      {listing.is_carousel_pinned ? "Pinned ✓" : "Pin"}
+                    </GlassButton>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        ))}
+      </div>
+    </div>
+  );
+}
 export default function Admin() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -842,6 +982,7 @@ export default function Admin() {
             <TabsTrigger value="waitlist" className="text-[10px]">Waitlist</TabsTrigger>
             <TabsTrigger value="suggestions" className="text-[10px] flex items-center gap-1"><Lightbulb className="w-3 h-3" />Ideas</TabsTrigger>
             <TabsTrigger value="settings" className="text-[10px] flex items-center gap-1"><Flag className="w-3 h-3" />Reports</TabsTrigger>
+            <TabsTrigger value="prosellers" className="text-[10px] flex items-center gap-1"><Star className="w-3 h-3" />Pro</TabsTrigger>
           </TabsList>
         </div>
 
@@ -883,6 +1024,9 @@ export default function Admin() {
         <TabsContent value="settings">
           <ReportsTab />
         </TabsContent>
+        <TabsContent value="prosellers">
+          <ProSellersTab />
+        </TabsContent>
       </Tabs>
 
       {/* Auth Dialog */}
@@ -911,6 +1055,10 @@ export default function Admin() {
     </div>
   );
 }
+
+
+
+
 
 
 
