@@ -6,7 +6,7 @@ export default function ShareMenu({ listing }) {
   const ref = useRef(null);
 
   const url = encodeURIComponent(window.location.href);
-  const text = encodeURIComponent(`Check out: ${listing?.title} - $${listing?.price}`);
+  const text = encodeURIComponent(`Check out: ${listing?.title} - ₦${listing?.price?.toLocaleString()}`);
 
   const shareLinks = [
     {
