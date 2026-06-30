@@ -20,7 +20,7 @@ import { toast } from "sonner";
 function addWatermark(url, username) {
   if (!url || !url.includes("cloudinary.com")) return url;
   const text = encodeURIComponent((username || "FUTAMART") + " x FUTAMART");
-  return url.replace("/upload/", "/upload/l_text:Arial_18_bold:" + text + ",o_25,co_white,g_south_east,x_10,y_10/");
+  return url.replace("/upload/", "/upload/l_text:Arial_28_bold:" + text + ",o_55,co_white,g_south_east,x_14,y_14/");
 }
 
 export default function ListingDetail() {
