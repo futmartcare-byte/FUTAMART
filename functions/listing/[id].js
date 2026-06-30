@@ -1,0 +1,35 @@
+export async function onRequest({ params, request }) {
+  const id = params.id;
+  const SUPABASE_URL = 'https://nuigjwriojnzkehlgbrh.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_JF7HtD3E2HRqH9jTGWpY2w_nTfBdHsu';
+  let title = 'FUTAMART';
+  let description = 'Buy and sell easily within FUTA - your campus marketplace.';
+  let image = 'https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/5bd4ffbb9_QjhED.jpg';
+  let price = '';
+  try {
+    const res = await fetch(SUPABASE_URL+'/rest/v1/listings?id=eq.'+id+'&select=title,price,images,description', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer '+SUPABASE_KEY }
+    });
+    const data = await res.json();
+    if (data && data[0]) {
+      const l = data[0];
+      title = l.title || title;
+      price = l.price ? ' - ₦'+Number(l.price).toLocaleString() : '';
+      description = l.description || description;
+      if (l.images && l.images[0]) image = l.images[0];
+    }
+  } catch(e) {}
+  const pageUrl = new URL(request.url).origin+'/listing/'+id;
+  const html = '<!DOCTYPE html><html><head><meta charset=UTF-8><title>'+title+price+' | FUTAMART</title>'
+    +'<meta property="og:title" content="'+title+price+'">'
+    +'<meta property="og:description" content="'+description+'">'
+    +'<meta property="og:image" content="'+image+'">'
+    +'<meta property="og:url" content="'+pageUrl+'">'
+    +'<meta property="og:type" content="website">'
+    +'<meta name="twitter:card" content="summary_large_image">'
+    +'<meta name="twitter:image" content="'+image+'">'
+    +'<meta http-equiv="refresh" content="0;url='+pageUrl+'">'
+    +'<script>window.location.href="'+pageUrl+'";<\/script>'
+    +'</head><body></body></html>';
+  return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+}
