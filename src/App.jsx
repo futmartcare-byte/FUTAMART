@@ -48,6 +48,9 @@ const AuthenticatedApp = () => {
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background overflow-hidden">
+        <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+          <span className="text-[11px] text-white/40 tracking-wide">Powered by Ck's Team</span>
+        </div>
         <div className="flex flex-col items-center gap-4">
           <img
             src="https://media.base44.com/images/public/6a2370f9e6d0e6ce0d081a52/5bd4ffbb9_QjhED.jpg"
@@ -57,9 +60,7 @@ const AuthenticatedApp = () => {
           />
           <span className="text-sm text-muted-foreground font-display tracking-wide">FUTAMART</span>
           <div className="w-6 h-6 border-2 border-orange-400 border-t-transparent rounded-full animate-spin mt-1" />
-          <div className="mt-2 px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
-            <span className="text-[10px] text-white/50 tracking-wide">Powered by Ck's Team</span>
-          </div>
+
         </div>
       </div>
     );
