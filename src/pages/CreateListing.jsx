@@ -44,6 +44,12 @@ async function uploadToCloudinary(file) {
   return data.secure_url;
 }
 
+function burnWatermark(url, username) {
+  if (!url || !url.includes("cloudinary.com")) return url;
+  const text = encodeURIComponent((username || "FUTAMART") + " x FUTAMART");
+  return url.replace("/upload/", "/upload/l_text:Arial_18_bold:" + text + ",o_25,co_white,g_south_east,x_10,y_10/");
+}
+
 export default function CreateListing() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
@@ -99,7 +105,7 @@ export default function CreateListing() {
     const files = [];
     for (const f of rawFiles) {
       if (f.size > MAX_FILE_SIZE) {
-        toast.error(`${f.name} is over 1MB — skipped. Please compress it first.`);
+        toast.error(`${f.name} is over 1MB ï¿½ skipped. Please compress it first.`);
       } else {
         files.push(f);
       }
@@ -111,7 +117,8 @@ export default function CreateListing() {
     }
     setUploading(true);
     try {
-      const urls = await Promise.all(files.map(uploadToCloudinary));
+      const rawUrls = await Promise.all(files.map(uploadToCloudinary));
+      const urls = rawUrls.map(url => burnWatermark(url, profile?.username));
       setForm((prev) => ({ ...prev, images: [...prev.images, ...urls] }));
     } catch (err) {
       toast.error("Image upload failed â€” try again");

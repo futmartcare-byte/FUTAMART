@@ -17,6 +17,12 @@ import ShareMenu from "@/components/ShareMenu";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
+function addWatermark(url, username) {
+  if (!url || !url.includes("cloudinary.com")) return url;
+  const text = encodeURIComponent((username || "FUTAMART") + " x FUTAMART");
+  return url.replace("/upload/", "/upload/l_text:Arial_18_bold:" + text + ",o_25,co_white,g_south_east,x_10,y_10/");
+}
+
 export default function ListingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -146,7 +152,7 @@ export default function ListingDetail() {
         {images.length > 0 ? (
           <>
             <img
-              src={images[currentImage]}
+              src={addWatermark(images[currentImage], listing?.seller_username)}
               alt={listing.title}
               className="w-full h-full object-cover cursor-zoom-in allow-interaction"
               onClick={() => setLightbox(true)}
@@ -233,7 +239,7 @@ export default function ListingDetail() {
           onClick={() => setLightbox(false)}
         >
           <button className="absolute top-4 right-4 text-white/60 text-sm">tap to close</button>
-          <img src={images[currentImage]} alt="" className="max-w-full max-h-[90vh] object-contain allow-interaction" />
+          <img src={addWatermark(images[currentImage], listing?.seller_username)} alt="" className="max-w-full max-h-[90vh] object-contain allow-interaction" />
         </div>
       )}
 

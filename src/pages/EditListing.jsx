@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
+import { useProfile } from "@/lib/useProfile";
 import { uploadToCloudinary } from "@/lib/uploadImage";
 import GlassCard from "@/components/GlassCard";
 import GlassButton from "@/components/GlassButton";
@@ -30,6 +31,7 @@ export default function EditListing() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: profile } = useProfile();
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [showLocked, setShowLocked] = useState(false);
@@ -99,9 +101,11 @@ export default function EditListing() {
     }
     setUploading(true);
     try {
-      const urls = await Promise.all(
+      const rawUrls = await Promise.all(
         files.map((file) => uploadToCloudinary(file, "futmart/listings"))
       );
+      const username = profile?.username || "FUTAMART";
+      const urls = rawUrls.map(url => url && url.includes("cloudinary.com") ? url.replace("/upload/", "/upload/l_text:Arial_18_bold:" + encodeURIComponent(username + " x FUTAMART") + ",o_25,co_white,g_south_east,x_10,y_10/") : url);
       setForm({ ...form, images: [...form.images, ...urls] });
     } catch (err) {
       toast.error("Image upload failed — try again");

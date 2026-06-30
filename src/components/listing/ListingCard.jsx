@@ -4,6 +4,12 @@ import { MapPin, Heart, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProCrown from "@/components/ProCrown";
 
+function addWatermark(url, username) {
+  if (!url || !url.includes("cloudinary.com")) return url;
+  const text = encodeURIComponent((username || "FUTAMART") + " x FUTAMART");
+  return url.replace("/upload/", "/upload/l_text:Arial_18_bold:" + text + ",o_25,co_white,g_south_east,x_10,y_10/");
+}
+
 export default function ListingCard({ listing, isSaved, onToggleSave }) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -28,7 +34,7 @@ export default function ListingCard({ listing, isSaved, onToggleSave }) {
           {!imageLoaded && <div className="absolute inset-0 skeleton-glass" />}
           {isVisible && (
             <img
-              src={listing.images?.[0]?.includes("cloudinary.com") ? listing.images[0].replace("/upload/", "/upload/w_400,c_limit,q_80,f_auto/") : listing.images?.[0]}
+              src={addWatermark(listing.images?.[0]?.includes("cloudinary.com") ? listing.images[0].replace("/upload/", "/upload/w_400,c_limit,q_80,f_auto/") : listing.images?.[0], listing.seller_username)}
               alt={listing.title}
 
               onLoad={() => setImageLoaded(true)}
