@@ -85,6 +85,7 @@ export default function Onboarding() {
     createProfile.mutate({
       username: makeUsername(user.email),
       full_name: user.user_metadata?.full_name || user.email?.split("@")[0],
+      phone_number: "",
     });
   };
 
