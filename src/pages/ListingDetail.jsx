@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
@@ -32,6 +32,31 @@ export default function ListingDetail() {
   const [currentImage, setCurrentImage] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const [saved, setSaved] = useState(false);
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+  const wasSwipe = useRef(false);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    wasSwipe.current = false;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      wasSwipe.current = true;
+      if (deltaX > 0) {
+        setCurrentImage((prev) => Math.max(0, prev - 1));
+      } else {
+        setCurrentImage((prev) => Math.min(images.length - 1, prev + 1));
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
 
   const { data: listing, isLoading } = useQuery({
     queryKey: ["listing", id],
@@ -155,7 +180,9 @@ export default function ListingDetail() {
               src={addWatermark(images[currentImage], listing?.seller_username)}
               alt={listing.title}
               className="w-full h-full object-cover cursor-zoom-in allow-interaction"
-              onClick={() => setLightbox(true)}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onClick={() => { if (wasSwipe.current) { wasSwipe.current = false; return; } setLightbox(true); }}
             />
             {images.length > 1 && (
               <>
@@ -236,7 +263,9 @@ export default function ListingDetail() {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
           style={{ background: "rgba(0,0,0,0.95)" }}
-          onClick={() => setLightbox(false)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onClick={() => { if (wasSwipe.current) { wasSwipe.current = false; return; } setLightbox(false); }}
         >
           <button className="absolute top-4 right-4 text-white/60 text-sm">tap to close</button>
           <img src={addWatermark(images[currentImage], listing?.seller_username)} alt="" className="max-w-full max-h-[90vh] object-contain allow-interaction" />
