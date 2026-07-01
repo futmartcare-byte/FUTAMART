@@ -11,13 +11,30 @@ export const AuthProvider = ({ children }) => {
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
 
+  const checkBan = async (userId) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("is_banned")
+      .eq("id", userId)
+      .single();
+    return data?.is_banned === true;
+  };
+
   useEffect(() => {
     checkUserAuth();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        setUser(session.user);
-        setIsAuthenticated(true);
+        const banned = await checkBan(session.user.id);
+        if (banned) {
+          await supabase.auth.signOut();
+          setUser(null);
+          setIsAuthenticated(false);
+          window.location.href = '/login?banned=1';
+        } else {
+          setUser(session.user);
+          setIsAuthenticated(true);
+        }
       } else {
         setUser(null);
         setIsAuthenticated(false);
@@ -39,6 +56,14 @@ export const AuthProvider = ({ children }) => {
       if (error) throw error;
 
       if (session?.user) {
+        const banned = await checkBan(session.user.id);
+        if (banned) {
+          await supabase.auth.signOut();
+          setUser(null);
+          setIsAuthenticated(false);
+          window.location.href = '/login?banned=1';
+          return;
+        }
         setUser(session.user);
         setIsAuthenticated(true);
       } else {
