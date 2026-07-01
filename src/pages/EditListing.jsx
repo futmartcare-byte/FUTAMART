@@ -27,6 +27,12 @@ const CATEGORIES = [
   { value: "other", label: "Other" },
 ];
 
+function formatPrice(value) {
+  const digits = value.replace(/[^\d]/g, "");
+  if (!digits) return "";
+  return Number(digits).toLocaleString("en-US");
+}
+
 export default function EditListing() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -164,7 +170,7 @@ export default function EditListing() {
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Price (₦)</Label>
-          <Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="glass border-white/10" />
+          <Input type="text" inputMode="numeric" value={formatPrice(form.price)} onChange={(e) => setForm({ ...form, price: e.target.value.replace(/[^\d]/g, "") })} className="glass border-white/10" />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Category</Label>

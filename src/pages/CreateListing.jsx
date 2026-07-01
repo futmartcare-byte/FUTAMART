@@ -50,6 +50,12 @@ function burnWatermark(url, username) {
   return url.replace("/upload/", "/upload/l_text:Arial_18_bold:" + text + ",o_25,co_white,g_south_east,x_10,y_10/");
 }
 
+function formatPrice(value) {
+  const digits = value.replace(/[^\d]/g, "");
+  if (!digits) return "";
+  return Number(digits).toLocaleString("en-US");
+}
+
 export default function CreateListing() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
@@ -190,8 +196,8 @@ export default function CreateListing() {
 
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Price (₦)</Label>
-          <Input type="number" min="0" step="1" value={form.price}
-            onChange={e => setForm({ ...form, price: e.target.value })}
+          <Input type="text" inputMode="numeric" value={formatPrice(form.price)}
+            onChange={e => setForm({ ...form, price: e.target.value.replace(/[^\d]/g, "") })}
             className="glass border-white/10" placeholder="0" />
         </div>
 
