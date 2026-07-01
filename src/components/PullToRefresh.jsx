@@ -1,4 +1,4 @@
-﻿import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 
@@ -42,7 +42,6 @@ export default function PullToRefresh({ children }) {
       if (navigator.vibrate) navigator.vibrate(15);
       try {
         await queryClient.invalidateQueries();
-        window.location.reload();
       } finally {
         setTimeout(() => {
           setIsRefreshing(false);
@@ -93,3 +92,4 @@ export default function PullToRefresh({ children }) {
     </div>
   );
 }
+
