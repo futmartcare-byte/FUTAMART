@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [isBanned, setIsBanned] = useState(false);
 
   const checkBan = async (userId) => {
     const { data } = await supabase
@@ -26,15 +27,9 @@ export const AuthProvider = ({ children }) => {
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const banned = await checkBan(session.user.id);
-        if (banned) {
-          await supabase.auth.signOut();
-          setUser(null);
-          setIsAuthenticated(false);
-          window.location.href = '/login?banned=1';
-        } else {
-          setUser(session.user);
-          setIsAuthenticated(true);
-        }
+        setUser(session.user);
+        setIsAuthenticated(true);
+        setIsBanned(banned);
       } else {
         setUser(null);
         setIsAuthenticated(false);
@@ -57,15 +52,9 @@ export const AuthProvider = ({ children }) => {
 
       if (session?.user) {
         const banned = await checkBan(session.user.id);
-        if (banned) {
-          await supabase.auth.signOut();
-          setUser(null);
-          setIsAuthenticated(false);
-          window.location.href = '/login?banned=1';
-          return;
-        }
         setUser(session.user);
         setIsAuthenticated(true);
+        setIsBanned(banned);
       } else {
         setUser(null);
         setIsAuthenticated(false);
@@ -131,6 +120,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{
       user,
       isAuthenticated,
+      isBanned,
       isLoadingAuth,
       isLoadingPublicSettings,
       authError,
@@ -156,3 +146,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

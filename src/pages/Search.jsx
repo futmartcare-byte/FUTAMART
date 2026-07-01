@@ -16,7 +16,7 @@ export default function Search() {
     queryKey: ["search-listings"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("listings").select("*").eq("status", "active")
+        .from("listings").select("*").eq("status", "active").eq("seller_is_banned", false)
         .order("created_at", { ascending: false }).limit(100);
       if (error) throw error;
       return data;
@@ -87,3 +87,4 @@ export default function Search() {
     </div>
   );
 }
+

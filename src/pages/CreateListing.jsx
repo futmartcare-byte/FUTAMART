@@ -57,7 +57,7 @@ function formatPrice(value) {
 }
 
 export default function CreateListing() {
-  const { user } = useAuth();
+  const { user, isBanned } = useAuth();
   const { data: profile } = useProfile();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -139,6 +139,7 @@ export default function CreateListing() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isBanned) { toast.error("Your account is restricted from this action. Contact support if you believe this is a mistake."); return; }
     if (!form.title.trim()) { toast.error("Please add a title"); return; }
     if (!form.price || Number(form.price) <= 0) { toast.error("Please add a valid price"); return; }
     if (form.images.length < 3) { toast.error("Please add at least 3 images"); return; }
@@ -248,6 +249,8 @@ export default function CreateListing() {
     </div>
   );
 }
+
+
 
 
 

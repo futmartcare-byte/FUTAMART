@@ -31,7 +31,7 @@ export default function SavedAds() {
     queryFn: async () => {
       if (savedListings.length === 0) return [];
       const ids = savedListings.map(s => s.listing_id);
-      const { data, error } = await supabase.from("listings").select("*").in("id", ids);
+      const { data, error } = await supabase.from("listings").select("*").in("id", ids).eq("seller_is_banned", false);
       if (error) throw error;
       return data;
     },
@@ -52,6 +52,7 @@ export default function SavedAds() {
         .select("*")
         .in("category", savedCategories)
         .eq("status", "active")
+        .eq("seller_is_banned", false)
         .not("id", "in", "(" + savedListingIds.join(",") + ")")
         .limit(20);
       if (error) throw error;
@@ -154,5 +155,6 @@ export default function SavedAds() {
     </div>
   );
 }
+
 
 

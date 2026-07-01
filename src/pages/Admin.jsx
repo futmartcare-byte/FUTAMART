@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
@@ -50,7 +50,7 @@ function SuggestionsTab() {
             <span className="text-[10px] text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</span>
           </div>
           <p className="text-sm text-foreground">{s.message}</p>
-          <p className="text-[10px] text-muted-foreground">— {s.username}</p>
+          <p className="text-[10px] text-muted-foreground">� {s.username}</p>
         </div>
       ))}
     </div>
@@ -131,7 +131,7 @@ function ReportsTab() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{r.target_name}</p>
-              <p className="text-xs text-muted-foreground">{r.target_type === "listing" ? "Listing" : "Seller"} · {r.reason}</p>
+              <p className="text-xs text-muted-foreground">{r.target_type === "listing" ? "Listing" : "Seller"} � {r.reason}</p>
               {r.details && <p className="text-xs text-muted-foreground/60 mt-0.5 truncate">{r.details}</p>}
               <div className="flex items-center gap-2 mt-1.5">
                 {r.target_type === "listing" && (
@@ -471,7 +471,7 @@ function ListingsTab({ listings, profiles, onRemoveListing, onFeatureListing }) 
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{listing.title}</p>
-                <p className="text-xs text-orange-400">₦{listing.price?.toLocaleString()}</p>
+                <p className="text-xs text-orange-400">?{listing.price?.toLocaleString()}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                     listing.status === "active" ? "bg-green-400/10 text-green-400" :
@@ -687,7 +687,7 @@ function NotificationsTab({ profiles, sentNotifications, onRefresh }) {
                 <p className="text-sm font-medium truncate">{n.title}</p>
                 <p className="text-xs text-muted-foreground truncate">{n.message}</p>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">
-                  {n.created_at ? format(new Date(n.created_at), "MMM d, h:mm a") : ""} Â· {n.is_read ? "Read" : "Unread"}
+                  {n.created_at ? format(new Date(n.created_at), "MMM d, h:mm a") : ""} · {n.is_read ? "Read" : "Unread"}
                 </p>
               </div>
               <button onClick={() => deleteNotif.mutate(n.id)} className="p-1 text-muted-foreground hover:text-red-400 shrink-0">
@@ -754,7 +754,7 @@ function ProSellersTab() {
     const newVal = !listing.is_carousel_pinned;
     const pinned = carouselSlots.filter(l => l.id !== listing.id && l.is_carousel_pinned);
     if (newVal && pinned.length >= 20) {
-      toast.error("Carousel is full — remove a listing first (max 20)");
+      toast.error("Carousel is full � remove a listing first (max 20)");
       return;
     }
     await supabase.from("listings").update({ is_carousel_pinned: newVal }).eq("id", listing.id);
@@ -787,7 +787,7 @@ function ProSellersTab() {
               {l.images?.[0] && <img src={l.images[0]} className="w-10 h-10 rounded-lg object-cover" />}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold truncate">{l.title}</p>
-                <p className="text-[10px] text-muted-foreground">@{l.seller_username} · shown {l.carousel_show_count}x</p>
+                <p className="text-[10px] text-muted-foreground">@{l.seller_username} � shown {l.carousel_show_count}x</p>
               </div>
               <GlassButton variant="ghost" className="text-[10px] px-2 py-1 text-red-400" onClick={() => removeFromCarousel(l)}>Remove</GlassButton>
             </GlassCard>
@@ -812,7 +812,7 @@ function ProSellersTab() {
                 <p className="text-xs font-semibold">@{seller.username}</p>
                 <p className="text-[10px] text-muted-foreground">Tap to view listings</p>
               </div>
-              <span className="text-orange-400 text-[10px]">▼</span>
+              <span className="text-orange-400 text-[10px]">?</span>
             </div>
 
             {selectedSeller?.id === seller.id && (
@@ -825,14 +825,14 @@ function ProSellersTab() {
                     {listing.images?.[0] && <img src={listing.images[0]} className="w-9 h-9 rounded-lg object-cover" />}
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold truncate">{listing.title}</p>
-                      <p className="text-[10px] text-muted-foreground">₦{listing.price?.toLocaleString()} · shown {listing.carousel_show_count}x</p>
+                      <p className="text-[10px] text-muted-foreground">?{listing.price?.toLocaleString()} � shown {listing.carousel_show_count}x</p>
                     </div>
                     <GlassButton
                       variant={listing.is_carousel_pinned ? "orange" : "ghost"}
                       className="text-[10px] px-2 py-1 shrink-0"
                       onClick={() => togglePin(listing)}
                     >
-                      {listing.is_carousel_pinned ? "Pinned ✓" : "Pin"}
+                      {listing.is_carousel_pinned ? "Pinned ?" : "Pin"}
                     </GlassButton>
                   </div>
                 ))}
@@ -903,8 +903,11 @@ export default function Admin() {
 
   const toggleBan = useMutation({
     mutationFn: async ({ profileId, isBanned }) => {
-      const { error } = await supabase.from("profiles").update({ is_banned: !isBanned }).eq("id", profileId);
+      const newBanStatus = !isBanned;
+      const { error } = await supabase.from("profiles").update({ is_banned: newBanStatus }).eq("id", profileId);
       if (error) throw error;
+      const { error: listingsError } = await supabase.from("listings").update({ seller_is_banned: newBanStatus }).eq("created_by_id", profileId);
+      if (listingsError) throw listingsError;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-profiles"] }); toast.success("Ban status updated!"); setConfirmAction(null); setAuthPassword(""); },
   });
@@ -1055,6 +1058,7 @@ export default function Admin() {
     </div>
   );
 }
+
 
 
 

@@ -136,6 +136,15 @@ export default function SellerProfile() {
       </div>
 
       <div className="p-4 space-y-4">
+        {profile.is_banned && (
+          <div className="glass rounded-2xl border border-red-500/40 bg-red-500/10 p-4 flex items-center gap-3">
+            <Flag className="w-5 h-5 text-red-400 shrink-0" />
+            <div>
+              <p className="font-bold text-red-400 text-sm">This seller is banned</p>
+              <p className="text-xs text-muted-foreground">This account has been suspended and its listings are currently unavailable.</p>
+            </div>
+          </div>
+        )}
         <GlassCard className="p-5 text-center">
           <div className="relative w-20 h-20 mx-auto cursor-pointer" onClick={() => profile.avatar_url && setLightbox(true)}>
             <div className="w-20 h-20 rounded-full glass flex items-center justify-center text-3xl font-bold text-orange-400 overflow-hidden">
@@ -266,3 +275,4 @@ export default function SellerProfile() {
     </div>
   );
 }
+

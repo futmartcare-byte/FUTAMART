@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
@@ -42,6 +42,7 @@ function ProSellerCarousel() {
         .eq("status", "active")
         .eq("seller_is_pro", true)
         .eq("is_carousel_pinned", true)
+        .eq("seller_is_banned", false)
         .order("carousel_show_count", { ascending: true });
 
       if (error || !data || data.length === 0) return;
@@ -134,7 +135,7 @@ function ProSellerCarousel() {
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-white/90 text-[11px] font-semibold leading-none">{slide.seller_username}</span>
-                <span className="text-orange-300 text-[12px] font-bold leading-none">₦{slide.price?.toLocaleString()}</span>
+                <span className="text-orange-300 text-[12px] font-bold leading-none">?{slide.price?.toLocaleString()}</span>
               </div>
               <span className="ml-auto text-[9px] text-white/30 italic self-end">Sponsored</span>
             </div>
@@ -191,6 +192,7 @@ export default function Home() {
       .from("listings")
       .select("*")
       .eq("status", "active")
+      .eq("seller_is_banned", false)
       .order("created_at", { ascending: false })
       .range(from, to);
     if (category !== "all") {
@@ -449,6 +451,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 

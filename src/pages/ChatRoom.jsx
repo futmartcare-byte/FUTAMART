@@ -117,7 +117,7 @@ function SwipeMessage({ isMe, children, onReply }) {
 
 export default function ChatRoom() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, isBanned } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -288,6 +288,7 @@ export default function ChatRoom() {
 
   const handleSend = () => {
     if (!text.trim()) return;
+    if (isBanned) { toast.error("Your account is restricted from this action. Contact support if you believe this is a mistake."); return; }
     const msgData = { payload_text: text, attachment_type: "none" };
     if (replyTo) {
       msgData.reply_to_id = replyTo.id;
@@ -615,6 +616,8 @@ export default function ChatRoom() {
     </div>
   );
 }
+
+
 
 
 
